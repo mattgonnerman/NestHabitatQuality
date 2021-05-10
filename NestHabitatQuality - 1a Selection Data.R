@@ -1,14 +1,16 @@
-###NEED A CSV WITH THE EXACT TIMESTAMP FOR EACH NEST INITIATION
-###FOR VHF BIRDS THAT NESTED THE YEAR AFTER CAPTURE, NEED TO CHOOSE A BETTER POINT FOR WINTER LOCATION BESIDES CAPTURE SITE
+###FOR VHF BIRDS THAT NESTED THE YEAR AFTER CAPTURE, NEED TO CHOOSE A BETTER POINT FOR WINTER LOCATION BESIDES CAPTURE SITE?
 ### MULTIPLE GPS BIRDS DONT HAVE NEST INFO BUT DEFINITELY NESTED
 
 
 
 ### Load relevant packages
-lapply(c('dplyr', 'sf', 'move', 'raster', 'lubridate', "ggplot2"), require, character.only = T)
+lapply(c('dplyr', 'sf', 'move', 'raster', 'lubridate', 'ggplot2', 'foreach', 'doParallel'), require, character.only = T)
 
 #Login info to download data from Movebank directly
 login <- movebankLogin(username = "matthew.gonnerman", password="26qPDLY9YN")
+
+#Number of cores for do parallel
+numCores <- detectCores() - 1
 
 ### Load relevant databases
 # Trapping data
@@ -51,13 +53,16 @@ gps.nest.TS <-  read.csv("GPSPRenestStart.csv") %>%
 gps_nest_info <- merge(gps_nests, gps.nest.TS, by = c("NestID", "BirdID"), all = T)
 
 
-### Read Existing Shapefiles
+### Read Existing Shapefiles if already created
 prelaying.gps.used <- read.csv("prelaying_gps_used.csv")
 prelaying.gps.used.polygon <- st_read(dsn = getwd(), layer = "prelaying.gps.used.polygon")
 prelaying.gps.used.points <- st_read(dsn = getwd(), layer = "prelaying.gps.used.points")
 prelaying.gps.avail.polygon <- st_read(dsn = getwd(), layer = "prelaying.gps.avail.polygon")
 prelaying.gps.avail.points <- st_read(dsn = getwd(), layer = "prelaying.gps.avail.points")
-
+prelaying.vhf.used.polygon <- st_read(dsn = getwd(), layer = "prelaying.vhf.used.polygon")
+prelaying.vhf.used.points <- st_read(dsn = getwd(), layer = "prelaying.vhf.used.points")
+prelaying.vhf.avail.polygon <- st_read(dsn = getwd(), layer = "prelaying.vhf.avail.polygon")
+prelaying.vhf.avail.points <- st_read(dsn = getwd(), layer = "prelaying.vhf.avail.points")
 
 #####################################################
 ### Pre Laying Selection Used and Available Sites ###
@@ -67,6 +72,7 @@ prelaying.gps.avail.points <- st_read(dsn = getwd(), layer = "prelaying.gps.avai
 
 ## GPS BIRDS ##
 # USED
+#Format timestamps for movebank
 prelaying.gps.used.times <- gps_nest_info %>%
   filter(!is.na(NestYear)) %>%
   dplyr::select(NestID, BirdID, NestYear, StartTimestamp = PrenestStart, EndTimestamp = FirstNestVisit) %>%
@@ -75,6 +81,7 @@ prelaying.gps.used.times <- gps_nest_info %>%
 
 rm("prelaying.gps.used.polygon")
 rm("prelaying.gps.used")
+#Loop through timestamps and create dBBMM polygons for each nest
 for(i in 1:nrow(prelaying.gps.used.times)){
   animalname <- as.character(prelaying.gps.used.times$BirdID[i])
   timestart <- prelaying.gps.used.times$StartTimestamp[i]
@@ -103,9 +110,13 @@ for(i in 1:nrow(prelaying.gps.used.times)){
     prelaying.gps.used <- as.data.frame(turkeygps@data) %>% mutate(NestID = nestid)
   }
 }
+#Transform to UTM 19N
 prelaying.gps.used.polygon <- st_transform(prelaying.gps.used.polygon, 32619)
+#Number of used points for each nest, used in determining available points
 prelaying.gps.used.length <- prelaying.gps.used %>% group_by(NestID) %>%
   summarize(Total = n())
+
+#Save relevant files as shapefiles/csv
 write.csv(prelaying.gps.used, "prelaying_gps_used.csv", row.names = F)
 st_write(prelaying.gps.used.polygon, dsn = getwd(), layer = "prelaying.gps.used.polygon", driver = "ESRI Shapefile", delete_layer = T)
 prelaying.gps.used.points <- st_as_sf(prelaying.gps.used, coords = c("location_long", "location_lat"),
@@ -116,6 +127,7 @@ st_write(prelaying.gps.used.points, dsn = getwd(), layer = "prelaying.gps.used.p
 
 
 # AVAILABLE
+#Format timestamps for movebank
 prelaying.gps.avail.times <- gps_nest_info %>%
   filter(!is.na(NestYear)) %>%
   dplyr::select(NestID, BirdID, NestYear, EndTimestamp = FirstNestVisit) %>%
@@ -123,6 +135,7 @@ prelaying.gps.avail.times <- gps_nest_info %>%
   mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp))
 
 rm("prelaying.gps.avail.polygon")
+#Loop through timestamps and create dBBMM polygons for each nest
 for(i in 1:nrow(prelaying.gps.avail.times)){
   animalname <- as.character(prelaying.gps.avail.times$BirdID[i])
   timestart <- prelaying.gps.avail.times$StartTimestamp[i]
@@ -149,16 +162,14 @@ for(i in 1:nrow(prelaying.gps.avail.times)){
     prelaying.gps.avail.polygon <- dBBMM_poly
   }
 }
-
+#Transform to UTM 19N
 prelaying.gps.avail.polygon <- st_transform(prelaying.gps.avail.polygon, 32619)
 
-require(foreach)
-require(doParallel)
-numCores <- detectCores() - 1
+#Number of available points for each nest
 num.avail.prelaying <- 10*prelaying.gps.used.length$Total
 
+#Parallel approach to st_sample, speeds things up for sampling available
 registerDoParallel(numCores)
-rm("prelaying.gps.avail.points")
 prelaying.gps.avail.points <- foreach(i=1:nrow(prelaying.gps.avail.polygon)) %dopar% {
   sf::st_sf(sf::st_sample(prelaying.gps.avail.polygon[i,],
                  exact = T,
@@ -167,19 +178,22 @@ prelaying.gps.avail.points <- foreach(i=1:nrow(prelaying.gps.avail.polygon)) %do
                  crs = 4326))
 }
 stopImplicitCluster()
+#Format outputs so its useable
 prelaying.gps.avail.points <- do.call(rbind, prelaying.gps.avail.points)
 prelaying.gps.avail.points$NestID <- rep(prelaying.gps.avail.polygon$NestID, num.avail.prelaying)
 colnames(prelaying.gps.avail.points)[1] <- "geometry"
 st_geometry(prelaying.gps.avail.points) <- "geometry"
 prelaying.gps.avail.points <- st_transform(prelaying.gps.avail.points, 32619)
 
+#Save relevant polygons/points as shapefiles
 st_write(prelaying.gps.avail.polygon, dsn = getwd(), layer = "prelaying.gps.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(prelaying.gps.avail.points, dsn = getwd(), layer = "prelaying.gps.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
 
 ## VHF BIRDS ##
 # USED
-vhf.prelaying.used.buffer.area <- mean(st_area(prelaying.gps.avail.polygon))*1.25
+#Use area of prelaying home range for GPS birds to determine buffer for VHF birds
+vhf.prelaying.used.buffer.area <- mean(st_area(prelaying.gps.used.polygon))*1.25
 vhf.prelaying.used.buffer.radius <- (vhf.prelaying.used.buffer.area/pi)^(1/2)
 vhf.nests.xy <- vhf_nests %>% dplyr::select(NestID, x = NestLong, y = NestLat)
 vhf.prelaying.used.nests <- st_as_sf(vhf.nests.xy,
@@ -187,8 +201,8 @@ vhf.prelaying.used.nests <- st_as_sf(vhf.nests.xy,
 vhf.prelaying.used.nests <- st_transform(vhf.prelaying.used.nests, 32619)
 prelaying.vhf.used.polygon <- st_buffer(vhf.prelaying.used.nests, vhf.prelaying.used.buffer.radius)
 
+#Parallel approach to sampling vhf used points
 registerDoParallel(numCores)
-rm("prelaying.vhf.used")
 prelaying.vhf.used.points <- foreach(i=1:nrow(prelaying.vhf.used.polygon)) %dopar% {
   sf::st_sf(sf::st_sample(prelaying.vhf.used.polygon[i,],
                           exact = T,
@@ -201,12 +215,13 @@ prelaying.vhf.used.points$NestID <- rep(prelaying.vhf.used.polygon$NestID, ceili
 colnames(prelaying.vhf.used.points)[1] <- "geometry"
 st_geometry(prelaying.vhf.used.points) <- "geometry"
 
+#Save relevant polygons/points as shapefiles
 st_write(prelaying.vhf.used.polygon, dsn = getwd(), layer = "prelaying.vhf.used.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(prelaying.vhf.used.points, dsn = getwd(), layer = "prelaying.vhf.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
 
 #AVAILABLE 
-#Create an ellipse using capture to nest information, extend distance 125%
+#Create a line from capture to nest, then buffer it using the radius of prenesting home range
 vhf.nests.xy <- vhf_nests %>% dplyr::select(NestID, x = NestLong, y = NestLat)
 vhf.cap.xy <- vhf_nests %>% dplyr::select(NestID, x = CapLong, y = CapLat)
 vhf.xy <- rbind(vhf.nests.xy, vhf.cap.xy) %>%
@@ -221,8 +236,8 @@ vhf.captonest.line <- st_sf(data.frame(vhf.lines.sfc, vhf_nests))
 # buffer2 <- ifelse(st_length(vhf.captonest.line) < mean(st_length(vhf.captonest.line)), mean(st_length(vhf.captonest.line)),st_length(vhf.captonest.line))
 prelaying.vhf.avail.polygon <- st_buffer(vhf.captonest.line, vhf.prelaying.used.buffer.radius)
 
+#Parallel sampling from within line buffers
 registerDoParallel(numCores)
-rm("prelaying.vhf.avail.points")
 prelaying.vhf.avail.points <- foreach(i=1:nrow(prelaying.vhf.avail.polygon)) %dopar% {
   sf::st_sf(sf::st_sample(prelaying.vhf.avail.polygon[i,],
                           exact = T,
@@ -236,7 +251,7 @@ prelaying.vhf.avail.points$NestID <- rep(prelaying.vhf.avail.polygon$NestID, 10*
 colnames(prelaying.vhf.avail.points)[1] <- "geometry"
 st_geometry(prelaying.vhf.avail.points) <- "geometry"
 
-
+#Save relevant polygons/points as shapefiles
 st_write(prelaying.vhf.avail.polygon, dsn = getwd(), layer = "prelaying.vhf.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(prelaying.vhf.avail.points, dsn = getwd(), layer = "prelaying.vhf.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
@@ -248,21 +263,133 @@ st_write(prelaying.vhf.avail.points, dsn = getwd(), layer = "prelaying.vhf.avail
 ### Available = PreLaying Home Range 
 
 ## GPS BIRDS ##
-
 # USED
+#Format timestamps for movebank
+laying.gps.used.times <- gps_nest_info %>%
+  filter(!is.na(NestYear)) %>%
+  dplyr::select(NestID, BirdID, NestYear, StartTimestamp = FirstNestVisit, EndTimestamp = IncubationStart) %>%
+  mutate(StartTimestamp = gsub("[^0-9]", "", StartTimestamp)) %>%
+  mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp))
+
+rm("laying.gps.used.polygon")
+rm("laying.gps.used")
+#Loop through timestamps and create dBBMM polygons for each nest
+for(i in 1:nrow(laying.gps.used.times)){
+  animalname <- as.character(laying.gps.used.times$BirdID[i])
+  timestart <- laying.gps.used.times$StartTimestamp[i]
+  timeend <- laying.gps.used.times$EndTimestamp[i]
+  year <- laying.gps.used.times$NestYear[i]
+  nestid <- laying.gps.used.times$NestID[i]
+  
+  turkeygps <- getMovebankData(study = "Eastern Wild Turkey, Gonnerman, Maine", 
+                               login = login,
+                               animal = animalname,
+                               timestamp_start = timestart,
+                               timestamp_end = timeend)
+  t_turkeygps <- spTransform(turkeygps, crs = 32619, center=T)
+  turk_dBBMM <- brownian.bridge.dyn(t_turkeygps, raster = 30, location.error = 17, margin = 5, window.size = 15, ext = 1.5)
+  turkey_UD <-raster2contour(turk_dBBMM, level=c(.95))
+  dBBMM_line <- st_as_sf(turkey_UD, "SpatialLines")
+  dBBMM_poly <- st_cast(dBBMM_line, "POLYGON")
+  dBBMM_poly$NestID <- nestid
+  
+  if(exists("laying.gps.used")){
+    dBBMM_poly <- st_transform(dBBMM_poly, st_crs(laying.gps.used.polygon))
+    laying.gps.used.polygon <- rbind(laying.gps.used.polygon, dBBMM_poly)
+    laying.gps.used <- rbind(laying.gps.used, as.data.frame(turkeygps@data) %>% mutate(NestID = nestid))
+  }else{
+    laying.gps.used.polygon <- dBBMM_poly
+    laying.gps.used <- as.data.frame(turkeygps@data) %>% mutate(NestID = nestid)
+  }
+}
+#Transform to UTM 19N
+laying.gps.used.polygon <- st_transform(laying.gps.used.polygon, 32619)
+#Number of used points for each nest, used in determining available points
+laying.gps.used.length <- laying.gps.used %>% group_by(NestID) %>%
+  summarize(Total = n())
+
+#Save relevant files as shapefiles/csv
+write.csv(laying.gps.used, "laying_gps_used.csv", row.names = F)
+st_write(laying.gps.used.polygon, dsn = getwd(), layer = "laying.gps.used.polygon", driver = "ESRI Shapefile", delete_layer = T)
+laying.gps.used.points <- st_as_sf(laying.gps.used, coords = c("location_long", "location_lat"),
+                                      dim = "XY", crs = 4326) %>%
+  dplyr::select(NestID, geometry, timestamp)
+laying.gps.used.points <- st_transform(laying.gps.used.points, 32619)
+st_write(laying.gps.used.points, dsn = getwd(), layer = "laying.gps.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
 
 # AVAILABLE
+laying.gps.avail.polygon <- prelaying.gps.used.polygon
+
+#Parallel sampling from within line buffers
+registerDoParallel(numCores)
+laying.vhf.avail.points <- foreach(i=1:nrow(laying.gps.avail.polygon)) %dopar% {
+  sf::st_sf(sf::st_sample(laying.gps.avail.polygon[i,],
+                          exact = T,
+                          by_polygon = F,
+                          size = 10*ceiling(mean(laying.gps.used.length$Total)*1.25),
+                          crs = 4326))
+}
+stopImplicitCluster()
+laying.vhf.avail.points <- do.call(rbind, laying.vhf.avail.points)
+laying.vhf.avail.points$NestID <- rep(laying.gps.avail.polygon$NestID, 10*ceiling(mean(laying.gps.used.length$Total)*1.25))
+colnames(laying.vhf.avail.points)[1] <- "geometry"
+st_geometry(laying.vhf.avail.points) <- "geometry"
+
+#Save relevant polygons/points as shapefiles
+st_write(laying.gps.avail.polygon, dsn = getwd(), layer = "laying.gps.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
+st_write(laying.gps.avail.points, dsn = getwd(), layer = "laying.gps.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
 
 ## VHF BIRDS ##
-
-
 # USED
+#Use area of laying home range for GPS birds to determine buffer for VHF birds
+vhf.laying.used.buffer.area <- mean(st_area(laying.gps.used.polygon))*1.25
+vhf.laying.used.buffer.radius <- (vhf.laying.used.buffer.area/pi)^(1/2)
+vhf.nests.xy <- vhf_nests %>% dplyr::select(NestID, x = NestLong, y = NestLat)
+vhf.laying.used.nests <- st_as_sf(vhf.nests.xy,
+                                     coords = c("x", "y"), crs = 4326)
+vhf.laying.used.nests <- st_transform(vhf.laying.used.nests, 32619)
+laying.vhf.used.polygon <- st_buffer(vhf.laying.used.nests, vhf.laying.used.buffer.radius)
 
+#Parallel approach to sampling vhf used points
+registerDoParallel(numCores)
+laying.vhf.used.points <- foreach(i=1:nrow(laying.vhf.used.polygon)) %dopar% {
+  sf::st_sf(sf::st_sample(laying.vhf.used.polygon[i,],
+                          exact = T,
+                          by_polygon = F,
+                          size = ceiling(mean(laying.gps.used.length$Total)*1.25)))
+}
+stopImplicitCluster()
+laying.vhf.used.points <- do.call(rbind, laying.vhf.used.points)
+laying.vhf.used.points$NestID <- rep(laying.vhf.used.polygon$NestID, ceiling(mean(laying.gps.used.length$Total)*1.25))
+colnames(laying.vhf.used.points)[1] <- "geometry"
+st_geometry(laying.vhf.used.points) <- "geometry"
+
+#Save relevant polygons/points as shapefiles
+st_write(laying.vhf.used.polygon, dsn = getwd(), layer = "laying.vhf.used.polygon", driver = "ESRI Shapefile", delete_layer = T)
+st_write(laying.vhf.used.points, dsn = getwd(), layer = "laying.vhf.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
 # AVAILABLE
+laying.vhf.avail.polygon <- prelaying.vhf.used.polygon
 
+#Parallel sampling from within line buffers
+registerDoParallel(numCores)
+laying.vhf.avail.points <- foreach(i=1:nrow(laying.vhf.avail.polygon)) %dopar% {
+  sf::st_sf(sf::st_sample(laying.vhf.avail.polygon[i,],
+                          exact = T,
+                          by_polygon = F,
+                          size = 10*ceiling(mean(laying.gps.used.length$Total)*1.25)))
+}
+stopImplicitCluster()
+laying.vhf.avail.points <- do.call(rbind, laying.vhf.avail.points)
+laying.vhf.avail.points$NestID <- rep(laying.vhf.avail.polygon$NestID, 10*ceiling(mean(laying.gps.used.length$Total)*1.25))
+colnames(laying.vhf.avail.points)[1] <- "geometry"
+st_geometry(laying.vhf.avail.points) <- "geometry"
+
+#Save relevant polygons/points as shapefiles
+st_write(laying.vhf.avail.polygon, dsn = getwd(), layer = "laying.vhf.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
+st_write(laying.vhf.avail.points, dsn = getwd(), layer = "laying.vhf.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
 
 
@@ -272,21 +399,100 @@ st_write(prelaying.vhf.avail.points, dsn = getwd(), layer = "prelaying.vhf.avail
 ### Used = Nest Location
 ### Available = PreLaying Home Range
 
-
 ## GPS BIRDS ##
-
 # USED
-
+gps.nests.xy <- gps_nests %>% dplyr::select(NestID, x = NestLong, y = NestLat)
+gps.nest.used.nests <- st_as_sf(gps.nests.xy,
+                                coords = c("x", "y"), crs = 4326)
+nest.gps.used.points <- st_transform(gps.nest.used.nests, 32619)
+st_write(nest.gps.used.points, dsn = getwd(), layer = "nest.gps.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
 # AVAILABLE
+#Format timestamps for movebank
+nest.gps.used.times <- gps_nest_info %>%
+  filter(!is.na(NestYear)) %>%
+  dplyr::select(NestID, BirdID, NestYear, StartTimestamp = PrenestStart, EndTimestamp = FirstNestVisit) %>%
+  mutate(StartTimestamp = gsub("[^0-9]", "", StartTimestamp)) %>%
+  mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp))
+
+rm("nest.gps.avail")
+rm("nest.gps.avail.polygon")
+#Loop through timestamps and create dBBMM polygons for each nest
+for(i in 1:nrow(nest.gps.avail.times)){
+  animalname <- as.character(nest.gps.avail.times$BirdID[i])
+  timestart <- nest.gps.avail.times$StartTimestamp[i]
+  timeend <- nest.gps.avail.times$EndTimestamp[i]
+  year <- nest.gps.avail.times$NestYear[i]
+  nestid <- nest.gps.avail.times$NestID[i]
+  
+  turkeygps <- getMovebankData(study = "Eastern Wild Turkey, Gonnerman, Maine", 
+                               login = login,
+                               animal = animalname,
+                               timestamp_start = timestart,
+                               timestamp_end = timeend)
+  t_turkeygps <- spTransform(turkeygps, crs = 32619, center=T)
+  turk_dBBMM <- brownian.bridge.dyn(t_turkeygps, raster = 30, location.error = 17, margin = 5, window.size = 15, ext = 1.5)
+  turkey_UD <-raster2contour(turk_dBBMM, level=c(.95))
+  dBBMM_line <- st_as_sf(turkey_UD, "SpatialLines")
+  dBBMM_poly <- st_cast(dBBMM_line, "POLYGON")
+  dBBMM_poly$NestID <- nestid
+  
+  if(exists("nest.gps.avail")){
+    dBBMM_poly <- st_transform(dBBMM_poly, st_crs(nest.gps.avail.polygon))
+    nest.gps.avail.polygon <- rbind(nest.gps.avail.polygon, dBBMM_poly)
+    nest.gps.avail <- rbind(nest.gps.avail, as.data.frame(turkeygps@data) %>% mutate(NestID = nestid))
+  }else{
+    nest.gps.avail.polygon <- dBBMM_poly
+    nest.gps.avail <- as.data.frame(turkeygps@data) %>% mutate(NestID = nestid)
+  }
+}
+#Parallel sampling from within line buffers
+registerDoParallel(numCores)
+nest.gps.avail.points <- foreach(i=1:nrow(nest.gps.avail.polygon)) %dopar% {
+  sf::st_sf(sf::st_sample(nest.gps.avail.polygon[i,],
+                          exact = T,
+                          by_polygon = F,
+                          size = 100,
+                          crs = 4326))
+}
+stopImplicitCluster()
+nest.gps.avail.points <- do.call(rbind, nest.gps.avail.points)
+nest.gps.avail.points$NestID <- rep(nest.gps.avail.polygon$NestID, 100)
+colnames(nest.gps.avail.points)[1] <- "geometry"
+st_geometry(nest.gps.avail.points) <- "geometry"
+
+#Save relevant files as shapefiles/csv
+st_write(nest.gps.avail.points, dsn = getwd(), layer = "nest.gps.avail.points", driver = "ESRI Shapefile", delete_layer = T)
+st_write(nest.gps.avail.polygon, dsn = getwd(), layer = "nest.gps.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 
 
 ## VHF BIRDS ##
-
-
 # USED
-
+vhf.nests.xy <- vhf_nests %>% dplyr::select(NestID, x = NestLong, y = NestLat)
+nest.vhf.used.points <- st_as_sf(vhf.nests.xy,
+                                  coords = c("x", "y"), crs = 4326)
+nest.vhf.used.points <- st_transform(nest.vhf.used.points, 32619)
 
 # AVAILABLE
+nest.vhf.avail.buffer.area <- mean(st_area(nest.gps.avail.polygon))*1.25
+nest.vhf.avail.buffer.radius <- (nest.vhf.avail.buffer.area/pi)^(1/2)
+nest.vhf.avail.polygon <- st_buffer(nest.vhf.used.points, nest.vhf.avail.buffer.radius)
+#Parallel sampling from within line buffers
+registerDoParallel(numCores)
+nest.vhf.avail.points <- foreach(i=1:nrow(nest.vhf.avail.polygon)) %dopar% {
+  sf::st_sf(sf::st_sample(nest.vhf.avail.polygon[i,],
+                          exact = T,
+                          by_polygon = F,
+                          size = 100,
+                          crs = 4326))
+}
+stopImplicitCluster()
+nest.vhf.avail.points <- do.call(rbind, nest.vhf.avail.points)
+nest.vhf.avail.points$NestID <- rep(nest.vhf.avail.polygon$NestID, 100)
+colnames(nest.vhf.avail.points)[1] <- "geometry"
+st_geometry(nest.vhf.avail.points) <- "geometry"
 
+#Save relevant files as shapefiles/csv
+st_write(nest.vhf.avail.points, dsn = getwd(), layer = "nest.vhf.avail.points", driver = "ESRI Shapefile", delete_layer = T)
+st_write(nest.vhf.avail.polygon, dsn = getwd(), layer = "nest.vhf.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 
