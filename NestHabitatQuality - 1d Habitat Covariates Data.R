@@ -70,7 +70,7 @@ lapply(c('dplyr', 'sf', 'move', 'raster', 'snowfall', 'lubridate', 'ggplot2', 'f
 # ### Load relevant databases
 # # Trapping data
 # trap.raw <- read.csv("Trapping - Data.csv") %>%
-#   filter(Recapture != "Y") %>%
+#   filter(Recapture != 1) %>%
 #   dplyr::select(BirdID = AlumBand, Trans.Type, CapAge = Age, CapDate = Date, CapLoc = Location)
 # 
 # # Nest site information
@@ -361,18 +361,18 @@ names(rasterlist) <- c("ag_foc1","ag_foc2","ag_foc3","ag_foc4",
 
 ### PreLaying Selection
 pl.vhf.used <- st_read("./GIS/prelaying.vhf.used.points.shp") %>%
-  mutate(Used = "Y") %>%
-  mutate(GPS = "N")
+  mutate(Used = 1) %>%
+  mutate(GPS = 0)
 pl.vhf.avail <- st_read("./GIS/prelaying.vhf.avail.points.shp")%>%
-  mutate(Used = "N") %>%
-  mutate(GPS = "N")
+  mutate(Used = 0) %>%
+  mutate(GPS = 0)
 pl.gps.used <- st_read("./GIS/prelaying.gps.used.points.shp")%>%
-  mutate(Used = "Y") %>%
-  mutate(GPS = "Y") %>%
+  mutate(Used = 1) %>%
+  mutate(GPS = 1) %>%
   dplyr::select(-timestamp)
 pl.gps.avail <- st_read("./GIS/prelaying.gps.avail.points.shp")%>%
-  mutate(Used = "N") %>%
-  mutate(GPS = "Y")
+  mutate(Used = 0) %>%
+  mutate(GPS = 1)
 
 prelaying.points <- rbind(pl.vhf.used, pl.vhf.avail, pl.gps.used, pl.gps.avail)
 
@@ -389,21 +389,24 @@ colnames(prelaying.extract) <- names(rasterlist)
 sfStop()
 
 prelaying.covs <- cbind(prelaying.points, prelaying.extract)
+prelaying.covs.z <- prelaying.covs %>%
+  mutate_at(names(rasterlist),funs(c(scale(.))))
+st_write(prelaying.covs.z, "./GIS/Prelaying_Covs_Z.shp")
 
 ### Laying Selection
 lay.vhf.used <- st_read("./GIS/laying.vhf.used.points.shp") %>%
-  mutate(Used = "Y") %>%
-  mutate(GPS = "N")
+  mutate(Used = 1) %>%
+  mutate(GPS = 0)
 lay.vhf.avail <- st_read("./GIS/laying.vhf.avail.points.shp")%>%
-  mutate(Used = "N") %>%
-  mutate(GPS = "N")
+  mutate(Used = 0) %>%
+  mutate(GPS = 0)
 lay.gps.used <- st_read("./GIS/laying.gps.used.points.shp")%>%
-  mutate(Used = "Y") %>%
-  mutate(GPS = "Y") %>%
+  mutate(Used = 1) %>%
+  mutate(GPS = 1) %>%
   dplyr::select(-timestamp)
 lay.gps.avail <- st_read("./GIS/laying.gps.avail.points.shp")%>%
-  mutate(Used = "N") %>%
-  mutate(GPS = "Y")
+  mutate(Used = 0) %>%
+  mutate(GPS = 1)
 
 laying.points <- rbind(lay.vhf.used, lay.vhf.avail, lay.gps.used, lay.gps.avail)
 
@@ -416,25 +419,27 @@ sfLibrary(sf)
 
 # Run parallelized 'extract' function and stop cluster
 laying.extract <- sfSapply(rasterlist, extract, y=laying.points)
-colnames(prelaying.extract) <- names(rasterlist)
+colnames(laying.extract) <- names(rasterlist)
 sfStop()
 
 laying.covs <- cbind(laying.points, laying.extract)
+laying.covs.z <- laying.covs %>%
+  mutate_at(names(rasterlist),funs(c(scale(.))))
+st_write(laying.covs.z, "./GIS/Laying_Covs_Z.shp")
 
 ### Nest Site Selection
 nest.vhf.used <- st_read("./GIS/nest.vhf.used.points.shp") %>%
-  mutate(Used = "Y") %>%
-  mutate(GPS = "N")
+  mutate(Used = "1") %>%
+  mutate(GPS = "0")
 nest.vhf.avail <- st_read("./GIS/nest.vhf.avail.points.shp")%>%
-  mutate(Used = "N") %>%
-  mutate(GPS = "N")
+  mutate(Used = "0") %>%
+  mutate(GPS = "0")
 nest.gps.used <- st_read("./GIS/nest.gps.used.points.shp")%>%
-  mutate(Used = "Y") %>%
-  mutate(GPS = "Y") %>%
-  dplyr::select(-timestamp)
+  mutate(Used = "1") %>%
+  mutate(GPS = "1")
 nest.gps.avail <- st_read("./GIS/nest.gps.avail.points.shp")%>%
-  mutate(Used = "N") %>%
-  mutate(GPS = "Y")
+  mutate(Used = "0") %>%
+  mutate(GPS = "1")
 
 nest.points <- rbind(nest.vhf.used, nest.vhf.avail, nest.gps.used, nest.gps.avail)
 
@@ -451,6 +456,10 @@ colnames(nest.extract) <- names(rasterlist)
 sfStop()
 
 nest.covs <- cbind(nest.points, nest.extract)
+nest.covs.z <- nest.covs %>%
+  mutate_at(names(rasterlist),funs(c(scale(.))))
+st_write(nest.covs.z, "./GIS/Nest_Covs_Z.shp")
+
 
 ### Nest Success 
 #https://cran.r-project.org/web/packages/exactextractr/exactextractr.pdf
