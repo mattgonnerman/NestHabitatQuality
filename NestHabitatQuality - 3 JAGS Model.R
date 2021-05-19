@@ -10,8 +10,36 @@ function(){#####################################################################
   scale_PLSel ~ dcat(c(0.25, 0.25, 0.25, 0.25))
   
   for(n in 1:N_PLSel){
-    logit(piPL[n]) <- intercept_RSF2[Ind_PLSel[n]] + beta_PLSel*cov_PLSel[n,scale_PLSel]
+    logit(piPL[n]) <- intercept_PLSel[Ind_PLSel[n]] + beta_PLSel*cov_PLSel[n,scale_PLSel]
     yPL[n] ~ dbern(piPL[n])
+  }
+  
+  ### Laying Habitat Selection
+  for(i in 1:NInd_LSel){
+    alpha_LSel[i] ~ dbeta(1,1)
+    intercept_LSel[i] <- logit(alpha_LSel[i])
+  }
+  
+  beta_LSel ~ dnorm(0, 0.01)
+  scale_LSel ~ dcat(c(0.25, 0.25, 0.25, 0.25))
+  
+  for(n in 1:N_LSel){
+    logit(piL[n]) <- intercept_LSel[Ind_LSel[n]] + beta_LSel*cov_LSel[n,scale_LSel]
+    yL[n] ~ dbern(piL[n])
+  }
+  
+  ### Nesting Habitat Selection
+  for(i in 1:NInd_NSel){
+    alpha_NSel[i] ~ dbeta(1,1)
+    intercept_NSel[i] <- logit(alpha_NSel[i])
+  }
+  
+  beta_NSel ~ dnorm(0, 0.01)
+  scale_NSel ~ dcat(c(0.25, 0.25, 0.25, 0.25))
+  
+  for(n in 1:N_NSel){
+    logit(piN[n]) <- intercept_NSel[Ind_NSel[n]] + beta_NSel*cov_NSel[n,scale_NSel]
+    yN[n] ~ dbern(piN[n])
   }
   
   # #3rd Order Selection

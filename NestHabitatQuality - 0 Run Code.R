@@ -27,12 +27,15 @@ covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
   "BA_", "HT_", "SW_",
   "D2Edg_", "D2Rd_", "D2Rp_")
 
-for(i in 1:length(covSelnames)){
+# for(i in 1:length(covSelnames)){
+for(i in 1){
   covname <- covSelnames[i]
+  print(paste("Run", covname, "Start Time:", Sys.time(), sep = " "))
   # Prep Data
   source(file = "NestHabitatQuality - 1 JAGS Data Prep.R")
   
   source(file = "NestHabitatQuality - 2 Execute JAGS.R")
+  print(paste("Run", covname, "End Time:", Sys.time(), sep = " "))
 }
 
 
