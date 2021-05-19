@@ -2,19 +2,20 @@ require(R2jags)
 
 ### Data needed for MCMC
 dat <- list(
-  ### Daily Survival Rate ###
-  dsr_succ = dsr_succ,
-  dsr_interval = dsr_interval,
-  dsr_nvisit = length(dsr_succ),
-  dsr_adult = dsr_adult, #Adult = 1, Juv = 0
+  ### PreLaying Selection ###
+  yPL = yPL, 
+  cov_PLSel = cov_PLSel,
+  Ind_PLSel = Ind_PLSel,
+  NInd_PLSel = NInd_PLSel
 )
 
 
 ### Parameters monitors
 parameters.null <- c(
-  ### Daily Survival Rate ###
-  "intercept_DHM",
-  "beta_A_DHM"
+  ### PreLaying Selection ###
+  "intercept_PLSel",
+  "beta_PLSel",
+  "scale_PLSel"
 )
 
 
@@ -23,7 +24,7 @@ names_for_parallel <- c()
 
 
 ### Model for JAGS
-NHQ_model <- source(file = "NestHabitatQuality - 3a JAGS Model.R")$value
+NHQ_model <- source(file = "NestHabitatQuality - 3 JAGS Model.R")$value
 
 
 ### Run model in parallel

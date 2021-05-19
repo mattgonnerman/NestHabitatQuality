@@ -22,7 +22,19 @@ nt <- 8 #thinning
 nb <- 5 #burn in period
 nc <- 5 #number of chains/parallel cores
 
-source(file = "NestHabitatQuality - 2a Execute JAGS.R")
+#Spatial Covariate Column Prefixes
+covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
+  "BA_", "HT_", "SW_",
+  "D2Edg_", "D2Rd_", "D2Rp_")
+
+for(i in 1:length(covSelnames)){
+  covname <- covSelnames[i]
+  # Prep Data
+  source(file = "NestHabitatQuality - 1 JAGS Data Prep.R")
+  
+  source(file = "NestHabitatQuality - 2 Execute JAGS.R")
+}
+
 
 # source(file = "NestHabitatQuality - 3a JAGS Model.R")
 

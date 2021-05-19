@@ -331,6 +331,9 @@ D2Rip_foc3 <- raster("./GIS/FinalRasters/D2Rip_Foc3.tif")
 # Foc4
 D2Rip_foc4 <- raster("./GIS/FinalRasters/D2Rip_Foc4.tif")
 
+## Is the point in water (NLCD)
+Water <- raster("./GIS/Water.tif")
+
 #Combine rasters into list
 rasterlist <- list(ag_foc1,ag_foc2,ag_foc3,ag_foc4,
                    dev_foc1,dev_foc2,dev_foc3,dev_foc4,
@@ -341,7 +344,8 @@ rasterlist <- list(ag_foc1,ag_foc2,ag_foc3,ag_foc4,
                    SW_foc1,SW_foc2,SW_foc3,SW_foc4,
                    D2Edge_foc1,D2Edge_foc2,D2Edge_foc3,D2Edge_foc4,
                    D2Road_foc1,D2Road_foc2,D2Road_foc3,D2Road_foc4,
-                   D2Rip_foc1,D2Rip_foc2,D2Rip_foc3,D2Rip_foc4)
+                   D2Rip_foc1,D2Rip_foc2,D2Rip_foc3,D2Rip_foc4,
+                   Water)
 
 names(rasterlist) <- c("ag_foc1","ag_foc2","ag_foc3","ag_foc4",
                        "dev_foc1","dev_foc2","dev_foc3","dev_foc4",
@@ -352,7 +356,8 @@ names(rasterlist) <- c("ag_foc1","ag_foc2","ag_foc3","ag_foc4",
                        "SW_foc1","SW_foc2","SW_foc3","SW_foc4",
                        "D2Edge_foc1","D2Edge_foc2","D2Edge_foc3","D2Edge_foc4",
                        "D2Road_foc1","D2Road_foc2","D2Road_foc3","D2Road_foc4",
-                       "D2Rip_foc1","D2Rip_foc2","D2Rip_foc3","D2Rip_foc4")
+                       "D2Rip_foc1","D2Rip_foc2","D2Rip_foc3","D2Rip_foc4",
+                       "Water")
 
 ##########################
 ### EXTRACT COVARIATES ###
@@ -388,7 +393,8 @@ prelaying.extract <- sfSapply(rasterlist, extract, y=prelaying.points)
 colnames(prelaying.extract) <- names(rasterlist)
 sfStop()
 
-prelaying.covs <- cbind(prelaying.points, prelaying.extract)
+prelaying.covs <- cbind(prelaying.points, prelaying.extract) %>%
+  filter(Water == 0)
 prelaying.covs.z <- prelaying.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(prelaying.covs.z, "./GIS/Prelaying_Covs_Z.shp")
@@ -422,7 +428,8 @@ laying.extract <- sfSapply(rasterlist, extract, y=laying.points)
 colnames(laying.extract) <- names(rasterlist)
 sfStop()
 
-laying.covs <- cbind(laying.points, laying.extract)
+laying.covs <- cbind(laying.points, laying.extract) %>%
+  filter(Water == 0)
 laying.covs.z <- laying.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(laying.covs.z, "./GIS/Laying_Covs_Z.shp")
@@ -455,13 +462,38 @@ nest.extract <- sfSapply(rasterlist, extract, y=nest.points)
 colnames(nest.extract) <- names(rasterlist)
 sfStop()
 
-nest.covs <- cbind(nest.points, nest.extract)
+nest.covs <- cbind(nest.points, nest.extract) %>%
+  filter(Water == 0)
 nest.covs.z <- nest.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(nest.covs.z, "./GIS/Nest_Covs_Z.shp")
 
 
 ### Nest Success 
-#https://cran.r-project.org/web/packages/exactextractr/exactextractr.pdf
+##Load Nest Info to get X,Y, and NestID
+nestlocations <- read.csv("Nest Monitoring - Nest Info.csv") %>%
+  filter(!is.na(NestLat)) %>%
+  dplyr::select(NestID, NestLat, NestLong)
+nestsuccess.sf <- st_as_sf(nestlocations,
+         coords = c("NestLong", "NestLat"), crs = 4326)
+nestsuccess.sf <- st_transform(nestsuccess.sf, 32619)
+
+#Create an R cluster using all the machine cores minus one
+sfInit(parallel=TRUE, cpus=parallel:::detectCores()-1)
+
+# Load the required packages inside the cluster
+sfLibrary(raster)
+sfLibrary(sf)
+
+# Run parallelized 'extract' function and stop cluster
+nestsuccess.extract <- sfSapply(rasterlist, extract, y=nestsuccess.sf)
+colnames(nestsuccess.extract) <- names(rasterlist)
+sfStop()
+
+nestsuccess.covs <- cbind(nestsuccess.sf, nestsuccess.extract)
+nestsuccess.covs.z <- nestsuccess.covs %>%
+  mutate_at(names(rasterlist),funs(c(scale(.))))
+st_write(nestsuccess.covs.z, "./GIS/NestSuccess_Covs_Z.shp")
+
 
 ### Hen Survival
