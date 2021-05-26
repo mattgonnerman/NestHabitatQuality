@@ -395,6 +395,7 @@ sfStop()
 
 prelaying.covs <- cbind(prelaying.points, prelaying.extract) %>%
   filter(Water == 0)
+st_write(prelaying.covs, "./GIS/Prelaying_Covs.shp")
 prelaying.covs.z <- prelaying.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(prelaying.covs.z, "./GIS/Prelaying_Covs_Z.shp")
@@ -430,6 +431,7 @@ sfStop()
 
 laying.covs <- cbind(laying.points, laying.extract) %>%
   filter(Water == 0)
+st_write(laying.covs, "./GIS/Laying_Covs.shp")
 laying.covs.z <- laying.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(laying.covs.z, "./GIS/Laying_Covs_Z.shp")
@@ -464,6 +466,7 @@ sfStop()
 
 nest.covs <- cbind(nest.points, nest.extract) %>%
   filter(Water == 0)
+st_write(nest.covs, "./GIS/Nest_Covs.shp")
 nest.covs.z <- nest.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(nest.covs.z, "./GIS/Nest_Covs_Z.shp")
@@ -491,6 +494,7 @@ colnames(nestsuccess.extract) <- names(rasterlist)
 sfStop()
 
 nestsuccess.covs <- cbind(nestsuccess.sf, nestsuccess.extract)
+st_write(nestsuccess.covs, "./GIS/NestSuccess_Covs.shp")
 nestsuccess.covs.z <- nestsuccess.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(nestsuccess.covs.z, "./GIS/NestSuccess_Covs_Z.shp")
