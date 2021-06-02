@@ -2,87 +2,86 @@ require(R2jags)
 
 ### Data needed for MCMC
 dat <- list(
-  # ### PreLaying Selection ###
-  # yPL = yPL,
-  # wtPL = weightsPL,
-  # cov_PLSel = cov_PLSel,
-  # Ind_PLSel = Ind_PLSel,
-  # NInd_PLSel = NInd_PLSel,
-  # N_PLSel = N_PLSel,
-  # 
-  # ### Laying Selection ###
-  # yL = yL,
-  # wtL = weightsL,
-  # cov_LSel = cov_LSel,
-  # Ind_LSel = Ind_LSel,
-  # NInd_LSel = NInd_LSel,
-  # N_LSel = N_LSel,
+  ### PreLaying Selection ###
+  yPL = yPL,
+  wtPL = weightsPL,
+  cov_PLSel = cov_PLSel,
+  Ind_PLSel = Ind_PLSel,
+  NInd_PLSel = NInd_PLSel,
+  N_PLSel = N_PLSel,
+
+  ### Laying Selection ###
+  yL = yL,
+  wtL = weightsL,
+  cov_LSel = cov_LSel,
+  Ind_LSel = Ind_LSel,
+  NInd_LSel = NInd_LSel,
+  N_LSel = N_LSel,
 
   ### Nesting Selection ###
   yN = yN,
   wtN = weightsN,
-  nNLocs = nNLocs,
-  # cov_N_F = cov_N_F,
-  # cov_N_L = cov_N_L,
-  cov_NSel = as.array(cov_NSel),
-  NInd_NSel = NInd_NSel
+  cov_NSel = cov_NSel,
+  Ind_NSel = Ind_NSel,
+  NInd_NSel = NInd_NSel,
+  N_NSel = N_NSel,
   
-  # ### Nest Success ###
-  # NDSR_succ = ns_succ.mat,
-  # NDSR_interval = ns_interval,
-  # NDSR_nvisit = length(ns_succ),
-  # cov_NDSR = cov_NDSR,
-  # NDSR_ID = ns_ID,
-  # 
-  # ### Nesting Habitat Quality Metric ###
-  # cov_NHQ = cov_NHQ,
-  # nNHQ = nrow(cov_NHQ)
+  ### Nest Success ###
+  NDSR_succ = ns_succ.mat,
+  NDSR_interval = ns_interval,
+  NDSR_nvisit = length(ns_succ),
+  cov_NDSR = cov_NDSR,
+  NDSR_ID = ns_ID,
+  
+  ### Nesting Habitat Quality Metric ###
+  cov_NHQ = cov_NHQ,
+  nNHQ = nrow(cov_NHQ)
 )
 
 
 ### Parameters monitors
 par.monitor <- c(
-  # ### PreLaying Selection ###
-  # "intercept_PLSel",
-  # "beta_SC_PLSel",
-  # "sigma_PLSel",
-  # "scale_PLSel",
-  # "w_PLSel",
-  # 
-  # ### Laying Selection ###
-  # "intercept_LSel",
-  # "beta_SC_LSel",
-  # "sigma_LSel",
-  # "scale_LSel",
-  # "w_LSel",
+  ### PreLaying Selection ###
+  "intercept_PLSel",
+  "beta_SC_PLSel",
+  "sigma_PLSel",
+  "scale_PLSel",
+  "w_PLSel",
+
+  ### Laying Selection ###
+  "intercept_LSel",
+  "beta_SC_LSel",
+  "sigma_LSel",
+  "scale_LSel",
+  "w_LSel",
 
   ### Nest Selection ###
   "intercept_NSel",
   "beta_SC_NSel",
   "sigma_NSel",
   "scale_NSel",
-  "w_NSel"
+  "w_NSel",
   
-  # ### Nest Success ###
-  # "intercept_NDSR",
-  # "beta_SC_NDSR",
-  # "sigma_NDSR",
-  # "intercept_HDSR",
-  # "beta_SC_HDSR",
-  # "sigma_HDSR",
-  # "intercept_FDSR",
-  # "beta_SC_FDSR",
-  # "sigma_FDSR",
-  # "scale_NDSR",
-  # "w_NDSR",
-  # "scale_HDSR",
-  # "w_HDSR",
-  # "scale_FDSR",
-  # "w_FDSR",
-  # "mean_succ",
-  # 
-  # ### Nesting Habitat Quality Metric ###
-  # "NHQ"
+  ### Nest Success ###
+  "intercept_NDSR",
+  "beta_SC_NDSR",
+  "sigma_NDSR",
+  "intercept_HDSR",
+  "beta_SC_HDSR",
+  "sigma_HDSR",
+  "intercept_FDSR",
+  "beta_SC_FDSR",
+  "sigma_FDSR",
+  "scale_NDSR",
+  "w_NDSR",
+  "scale_HDSR",
+  "w_HDSR",
+  "scale_FDSR",
+  "w_FDSR",
+  "mean_succ",
+  
+  ### Nesting Habitat Quality Metric ###
+  "NHQ"
 )
 
 

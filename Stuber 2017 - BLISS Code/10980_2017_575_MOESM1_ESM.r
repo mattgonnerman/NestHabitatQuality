@@ -73,12 +73,12 @@ run_BLISS = function(simulation_data, jags_file, niterations = 20000, burnin = 5
 
 ## run study
 # load data
-load("simulation_data_example.RData")
+load("./Stuber 2017 - BLISS Code/simulation_data_example.RData")
 
 # run BLISS
 BLISS_result = run_BLISS(
   simulation_data = simulation_data_example,
-  jags_file = "jags_example.txt",
+  jags_file = "./Stuber 2017 - BLISS Code/10980_2017_575_MOESM2_ESM.txt",
   niterations = 20000,
   burnin = 5000
 )
