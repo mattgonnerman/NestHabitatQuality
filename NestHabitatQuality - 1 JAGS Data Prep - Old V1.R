@@ -12,6 +12,8 @@ w <- 10000
 prelaying.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
   arrange(NestID, Used)
 
+prelaying.df <- st_drop_geometry(prelaying.covs)
+
 yPL <- prelaying.covs$Used
 weightsPL <- ifelse(yPL == "0", w, 1)
 cov_PLSel <- as.matrix(st_drop_geometry(prelaying.covs[,which(grepl(covname, colnames(prelaying.covs)))]))

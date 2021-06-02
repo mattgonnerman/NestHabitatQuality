@@ -17,23 +17,6 @@ function(){#####################################################################
     logit(piPL[n]) <- intercept_PLSel[Ind_PLSel[n]] + beta_SC_PLSel*cov_PLSel[n,scale_PLSel]
     yPL[n] ~ dbern(piPL[n]*wtPL[n])
   }
-  
-  ### Justification for using a conditional logistic regression for RSF
-  ## Duchesne et al 2010 - Mixed conditional logsitic regression for habitat selection studies
-  ### Weighted Conditional Logistic Regression
-  ## Lee et al. 2019
-  ### Conditional Logistic Regression Code From...
-  ## Espino-Hernandez et al. 2011
-  for( i in 1:NInd_PLSel){
-    yPL[i, 1:nLoc[i]] ~ dmulti(p[i,1:nLocs[i]], 1)
-    for(j in 1:nLocs[i]){
-      p[i,j] <- e[i,j]/sum(wtPL[i,1:nLocs[i]]*e[i,1:nLocs[i]])
-      log(e[i,j]) <- intercept_PLSel[Ind_PLSel[i]] + beta_SC_PLSel*cov_PLSel[i,scale_PLSel]
-    }
-  }
-
-  
-  
 
   ### Laying Habitat Selection
   for(i in 1:NInd_LSel){

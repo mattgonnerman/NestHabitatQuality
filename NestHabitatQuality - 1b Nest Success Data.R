@@ -67,8 +67,80 @@ monitoring.clean <- monitoring.comp %>%
   mutate(RefDate = 1+yday(Date) - yday(Day1)) %>%
   ungroup()
 
+
+### Hen Mortality
+
+#Get mortality dates for relevant birds
+telem.raw <- read.csv("Telemetry_Data - Telemetry.csv")
+
+death.dates <- telem.raw %>% dplyr::select(BirdID = AlumBand, Date, Fate) %>% 
+  mutate(Date = as.POSIXct(Date, format = "%m/%d/%Y")) %>%
+  mutate(Year = year(Date)) %>%
+  filter(Fate == "D" ) %>%
+  group_by(BirdID) %>%
+  arrange(Date) %>%
+  slice(1L) %>%
+  ungroup() %>%
+  mutate(NestID = paste(BirdID, Year, 1, sep = "-")) %>%
+  filter(NestID %in% nest.info$NestID)  %>%
+  mutate(HenMort = 1)
+  
+#Get First off nest
+monitoring.firstoff <- monitoring.clean %>% 
+  filter(Status == 0) %>%
+  group_by(NestID) %>%
+  arrange(Date) %>%
+  slice(1L)
+
+killed.on.nest <- merge(monitoring.firstoff, death.dates, by = c("NestID", "Date")) %>%
+  arrange(NestID, Date)
+
+### Nest Abandoned post Flushing
+#Flush Count Date
+flush.date <- nestfate.raw %>%
+  dplyr::select(NestID, Date = Date.Counted) %>%
+  filter(!is.na(Date) & Date != "") %>%
+  mutate(Date = as.POSIXct(Date, format = "%m/%d/%Y")) %>%
+  mutate(Flushed = 1)
+
+# Last Day On Nest
+monitoring.lastdayon <- monitoring.clean %>% 
+  filter(Status == 1) %>%
+  group_by(NestID) %>%
+  arrange(desc(Date)) %>%
+  slice(1L)
+
+flushed.aband <- merge(monitoring.lastdayon, flush.date, by = c("NestID", "Date"))
+
+#Check If Hens are in both flush and death lists
+which(killed.on.nest$NestID %in% flushed.aband$NestID)
+which(flushed.aband$NestID %in% killed.on.nest$NestID)
+killed.on.nest <- killed.on.nest[-which(killed.on.nest$NestID %in% flushed.aband$NestID),]
+  
 #Transform into EH format
 ns_eh_matrix <- monitoring.clean %>% dcast(NestID ~ RefDate, value.var = "Status")
+
+ns_eh_failnomort <- ns_eh_matrix[2:ncol(ns_eh_matrix)]
+ns_eh_failnomort <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 1, NA))
+ns_eh_failmort <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 0, NA))
+ns_eh_failflush <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 0, NA))
+
+
+row.mort <- which(ns_eh_matrix$NestID %in% killed.on.nest$NestID)
+row.flush <- which(ns_eh_matrix$NestID %in% flushed.aband$NestID)
+
+for(i in 1:nrow(ns_eh_failnomort)){
+  for(j in 1:ncol(ns_eh_failnomort)){
+
+    ns_eh_failmort[i,j] <- ifelse(i %in% row.mort & ns_eh_failnomort[i,j] == 1, 1,
+                                  ifelse(i %in% row.flush & ns_eh_failnomort[i,j] == 1, 0, ns_eh_failmort[i,j]))
+    ns_eh_failflush[i,j] <- ifelse(i %in% row.mort & ns_eh_failnomort[i,j] == 1, 0, 
+                                   ifelse(i %in% row.flush & ns_eh_failnomort[i,j] == 1, 1, ns_eh_failflush[i,j]))
+    ns_eh_failnomort[i,j] <- ifelse(i %in% row.mort & ns_eh_failnomort[i,j] == 1, 0,
+                                    ifelse(i %in% row.flush & ns_eh_failnomort[i,j] == 1, 0, ns_eh_failnomort[i,j]))
+    
+  } #j
+} #i
 
 
 ########################
@@ -83,6 +155,23 @@ ns_exposure <- ncol(ns_eh_matrix)-1
 #Vectorize encounter histories
 ns_succ1 <- as.vector(t(ns_eh_matrix_edit))
 ns_succ <- ns_succ1[!is.na(ns_succ1)]
+
+ns_failnomort1 <- as.vector(t(ns_eh_failnomort))
+ns_failnomort <- ns_failnomort1[!is.na(ns_failnomort1)]
+
+ns_failmort1 <- as.vector(t(ns_eh_failmort))
+ns_failmort <- ns_failmort1[!is.na(ns_failmort1)]
+
+ns_failflush1 <- as.vector(t(ns_eh_failflush))
+ns_failflush <- ns_failflush1[!is.na(ns_failflush1)]
+
+#Format as a matrix for JAGS model
+ns_succ.mat <- matrix(c(ns_succ, ns_failnomort, ns_failmort, ns_failflush), ncol = 4, nrow = length(ns_failnomort), byrow = F)
+
+#Double check that all rows sum to 1 and the columns sum = length of number in each group
+rowSums(ns_succ.mat)
+colSums(ns_succ.mat)
+
 ns_ID <- matrix(1:ns_n_ind, nrow = ns_n_ind, ncol = ns_exposure)
 ns_ID <- as.vector(t(ns_ID))
 ns_ID <- ns_ID[!is.na(ns_succ1)]      # ID marker

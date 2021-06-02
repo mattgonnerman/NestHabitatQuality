@@ -60,6 +60,7 @@ for(i in 1){
   print(paste("Run", covname, "End Time:", Sys.time(), sep = " "))
 }
 
+NHQ_output
 
 ### Examine Model Outputs
 #Create NHQ Raster from Outputs
