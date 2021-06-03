@@ -1,5 +1,5 @@
 ### Load Relevant R packages 
-lapply(c('dplyr', 'sf', 'move', 'raster', 'snowfall', 'lubridate', 'ggplot2', 'foreach', 'doParallel'), require, character.only = T)
+lapply(c('dplyr', 'sf', 'move', 'raster', 'snowfall', 'lubridate', 'ggplot2', 'foreach', 'doParallel', 'reshape2'), require, character.only = T)
 
 memory.limit(56000)
 
@@ -42,6 +42,20 @@ w <- 10000
 nest.covs <- st_read("./GIS/Nest_Covs.shp") %>%
   arrange(NestID, Used)
 
+nest.used <- nest.covs %>% filter(Used == 1) %>%
+  group_by(NestID) %>%
+  mutate(PairID = row_number())
+nest.avail <- nest.covs %>% filter(Used == 0) %>%
+  group_by(NestID) %>%
+  mutate(PairID = floor(row_number()/100)+1)  #10 for PL and L, 100 for N
+
+nest.df <- st_drop_geometry(rbind(nest.used, nest.avail)) %>%
+  mutate(PairID2 = paste(NestID, PairID, sep = "_")) %>%
+  arrange(PairID2, desc(Used)) %>%
+  group_by(PairID2) %>%
+  filter(!all(Used != 1)) %>%
+  ungroup()
+
 # yN <- nest.covs$Used
 # wtN <- ifelse(yN == "0", w, 1)
 # cov_NSel <- st_drop_geometry(nest.covs[,which(grepl(covname, colnames(nest.covs)))])
@@ -49,11 +63,11 @@ nest.covs <- st_read("./GIS/Nest_Covs.shp") %>%
 # cov_N_L <- c(cov_N_F[2:length(cov_N_F)]-1, nrow(cov_NSel))
 # NInd_NSel <- length(unique(nest.covs$NestID))
 
-nest.df <- st_drop_geometry(nest.covs)
-yN <- as.matrix(nest.df %>% dplyr::select(NestID, Used) %>%
-  group_by(NestID) %>% mutate(Number = row_number()) %>%
-  dcast(NestID ~ Number, value.var = "Used") %>%
-  dplyr::select(-NestID))
+# nest.df <- st_drop_geometry(nest.covs)
+yN <- as.matrix(nest.df %>% dplyr::select(PairID2, Used) %>%
+  group_by(PairID2) %>% mutate(Number = row_number()) %>%
+  dcast(PairID2 ~ Number, value.var = "Used") %>%
+  dplyr::select(-PairID2))
 weightsN <- ifelse(yN == "0", w, ifelse(yN == 1, 1, NA))
 nNLocs <- rowSums(!is.na(yN))
 NInd_NSel <- nrow(yN)

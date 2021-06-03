@@ -5,28 +5,50 @@ function(){#####################################################################
   ## Lee et al. 2019
   ### Conditional Logistic Regression Code From...
   ## Espino-Hernandez et al. 2011
+
   
   ### Prelaying Habitat Selection
-  for(i in 1:NInd_PLSel){
-    alpha_PLSel[i] ~ dbeta(1,1)
-    intercept_PLSel[i] <- logit(alpha_PLSel[i])
-  }
-  beta_SC_PLSel ~ dnorm(0, tau_PLSel)
+  ## Priors
+  # Habitat Coefficient
+  beta_SC_PLSel ~ dnorm(0, tau_PLSel) 
   tau_PLSel <- 1/(pow(sigma_PLSel,2))
   sigma_PLSel ~ dunif(0,50)
+  
+  # BLISS 
   scale_PLSel ~ dcat(w_PLSel[1:4])
   w_PLSel[1:4] ~ ddirch(c(0.25,0.25,0.25,0.25))
 
-  for(i in 1:NInd_PLSel){
-    yPL[i, 1:nPLLocs[i]] ~ dmulti(p_PL[i,1:nPLLocs[i]], 1)
-    for(j in 1:nPLLocs[i]){
-      p_PL[i,j] <- e_PL[i,j]/sum(wtPL[i,1:nPLLocs[i]]*e_PL[i,1:nPLLocs[i]])
-      log(e_PL[i,j]) <- intercept_PLSel + beta_SC_PLSel*cov_PLSel[j,scale_PLSel,i]
+  # Individual Random Effect
+  alpha_PLSel[i:NInd_PL] ~ dmnorm(mu_PL[1:NInd_PL], omega_PL[1:NInd_PL,1:NInd_PL])
+  for(i in 1:NInd_PL){
+    mu_PL[i] <- 0
+    for(j in 1:NInd_PL){
+      omega_PL[i,j] ~ dwish(R_PL, NInd_PL)
+      R_PL[i,j] <- 0
+    }
+  }
+  
+  # Random Error 
+  for(i in 1:NNest_PLSel){  
+    for(j in 1:11){
+      err_PL[i,j] ~ dnorm(0, tau_PLerr) 
+    }
+  }
+  tau_PLerr <- 1/(pow(sigma_PLerr,2))
+  sigma_PLerr ~ dunif(0,50)
+  
+  ## Likelihood
+  for(i in 1:NGrp_PLSel){
+    yPL[i, 1:11] ~ dmulti(p_PL[i,1:11], 1)
+    for(j in 1:11){
+      p_PL[i,j] <- e_PL[i,j]/sum(wtPL[i,1:11]*e_PL[i,1:11])
+      log(e_PL[i,j]) <- alpha[NestID_PL[i]] + beta_SC_PLSel*cov_PLSel[j,scale_PLSel,i] + err_PL[i,j]
     }
   }
 
-
-    ### Laying Habitat Selection
+  #############################################################################
+  
+  ### Laying Habitat Selection
   for(i in 1:NInd_LSel){
     alpha_LSel[i] ~ dbeta(1,1)
     intercept_LSel[i] <- logit(alpha_LSel[i])
