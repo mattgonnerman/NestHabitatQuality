@@ -261,7 +261,8 @@ laying.gps.used.times <- gps_nest_info %>%
   filter(!is.na(NestYear)) %>%
   dplyr::select(NestID, BirdID, NestYear, StartTimestamp = FirstNestVisit, EndTimestamp = IncubationStart) %>%
   mutate(StartTimestamp = gsub("[^0-9]", "", StartTimestamp)) %>%
-  mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp))
+  mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp)) %>%
+  filter(!is.na(StartTimestamp))
 
 rm("laying.gps.used.polygon")
 rm("laying.gps.used")
@@ -279,7 +280,7 @@ for(i in 1:nrow(laying.gps.used.times)){
                                timestamp_start = timestart,
                                timestamp_end = timeend)
   t_turkeygps <- spTransform(turkeygps, crs = 32619, center=T)
-  turk_dBBMM <- brownian.bridge.dyn(t_turkeygps, raster = 30, location.error = 17, margin = 5, window.size = 15, ext = 1.5)
+  turk_dBBMM <- brownian.bridge.dyn(t_turkeygps, raster = 30, location.error = 17, margin = 5, window.size = 15, ext = 1.9)
   turkey_UD <-raster2contour(turk_dBBMM, level=c(.95))
   dBBMM_line <- st_as_sf(turkey_UD, "SpatialLines")
   dBBMM_poly <- st_cast(dBBMM_line, "POLYGON")
@@ -316,7 +317,8 @@ laying.gps.avail.times <- gps_nest_info %>%
   filter(!is.na(NestYear)) %>%
   dplyr::select(NestID, BirdID, NestYear, StartTimestamp = PrenestStart, EndTimestamp = IncubationStart) %>%
   mutate(StartTimestamp = gsub("[^0-9]", "", StartTimestamp)) %>%
-  mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp))
+  mutate(EndTimestamp = gsub("[^0-9]", "", EndTimestamp)) %>%
+  filter(!is.na(StartTimestamp))
 
 rm("laying.gps.avail.polygon")
 rm("laying.gps.avail")
@@ -447,12 +449,12 @@ nest.gps.avail.points <- foreach(i=1:nrow(nest.gps.avail.polygon)) %dopar% {
   sf::st_sf(sf::st_sample(nest.gps.avail.polygon[i,],
                           exact = T,
                           by_polygon = F,
-                          size = 110,
+                          size = 15,
                           crs = 4326))
 }
 stopImplicitCluster()
 nest.gps.avail.points <- do.call(rbind, nest.gps.avail.points)
-nest.gps.avail.points$NestID <- rep(nest.gps.avail.polygon$NestID, 100)
+nest.gps.avail.points$NestID <- rep(nest.gps.avail.polygon$NestID, 15)
 colnames(nest.gps.avail.points)[1] <- "geometry"
 st_geometry(nest.gps.avail.points) <- "geometry"
 
@@ -479,12 +481,12 @@ nest.vhf.avail.points <- foreach(i=1:nrow(nest.vhf.avail.polygon)) %dopar% {
   sf::st_sf(sf::st_sample(nest.vhf.avail.polygon[i,],
                           exact = T,
                           by_polygon = F,
-                          size = 110,
+                          size = 15,
                           crs = 4326))
 }
 stopImplicitCluster()
 nest.vhf.avail.points <- do.call(rbind, nest.vhf.avail.points)
-nest.vhf.avail.points$NestID <- rep(nest.vhf.avail.polygon$NestID, 100)
+nest.vhf.avail.points$NestID <- rep(nest.vhf.avail.polygon$NestID, 15)
 colnames(nest.vhf.avail.points)[1] <- "geometry"
 st_geometry(nest.vhf.avail.points) <- "geometry"
 

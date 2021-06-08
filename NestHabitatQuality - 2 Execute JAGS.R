@@ -3,7 +3,7 @@ require(R2jags)
 ### Data needed for MCMC
 dat <- list(
   ### PreLaying Selection ###
-  y_PL = yPL, # Used/Available Specifications
+  y_PL = y_PL, # Used/Available Specifications
   wt_PL = weightsPL, #Weights for IWLR
   cov_PLSel = cov_PLSel, # Spatial Covariates (3Dim Array)
   NestID_PL = Ind_PLSel, # Numeric Nest ID
@@ -11,7 +11,7 @@ dat <- list(
   NNest_PLSel = N_PLSel, # Count of Individual Nests
 
   ### Laying Selection ###
-  y_L = yL, # Used/Available Specifications
+  y_L = y_L, # Used/Available Specifications
   wt_L = weightsL, #Weights for IWLR
   cov_LSel = cov_LSel, # Spatial Covariates (3Dim Array)
   NestID_L = Ind_LSel, # Numeric Nest ID
@@ -19,7 +19,7 @@ dat <- list(
   NNest_LSel = N_LSel, # Count of Individual Nests
 
   ### Nesting Selection ###
-  y_N = yN, # Used/Available Specifications
+  y_N = y_N, # Used/Available Specifications
   wt_N = weightsN, #Weights for IWLR
   cov_NSel = cov_NSel, # Spatial Covariates (3Dim Array)
   NestID_N = Ind_NSel, # Numeric Nest ID

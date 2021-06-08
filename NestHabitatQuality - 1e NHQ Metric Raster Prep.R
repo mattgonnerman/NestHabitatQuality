@@ -136,16 +136,12 @@ names(rasterlist) <- c("ag_foc1","ag_foc2","ag_foc3","ag_foc4",
                        "Water")
 
 #Load polygon of Maine for use in creating grid
-mainepoly <- st_read("E:/Maine Drive/GIS/Maine Polygon/Maine_Boundaries_County_Polygon.shp")
-mainepoly <- mainepoly %>% dplyr::select(geometry)
-mainepoly <- st_cast(mainepoly, "POLYGON")
-mainepoly$Area <- st_area(mainepoly) 
-mainepoly <- mainepoly %>%
-  arrange(desc(Area)) %>%
-  filter(Area > as_units(84187782, "m2"))
+#Subset polygons to just the towns that makeup the core Bangor study area
+mainepoly <- st_read("E:/Maine Drive/GIS/Maine_Boundaries_Town_and_Townships_Polygon-shp/BangorAreaTowns.shp")
+mainepoly <- st_union(mainepoly)
 
 ### Create points to extract raster values to
-NHQpoints <- st_as_sf(st_make_grid(mainepoly, cellsize = 1000, what = "centers"))
+NHQpoints <- st_as_sf(st_make_grid(mainepoly, cellsize = 30, what = "centers"))
 
 #Create an R cluster using all the machine cores minus one
 sfInit(parallel=TRUE, cpus=parallel:::detectCores()-1)

@@ -395,10 +395,10 @@ sfStop()
 
 prelaying.covs <- cbind(prelaying.points, prelaying.extract) %>%
   filter(Water == 0)
-st_write(prelaying.covs, "./GIS/Prelaying_Covs.shp")
+st_write(prelaying.covs, "./GIS/Prelaying_Covs.shp", delete_layer = T)
 prelaying.covs.z <- prelaying.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
-st_write(prelaying.covs.z, "./GIS/Prelaying_Covs_Z.shp")
+st_write(prelaying.covs.z, "./GIS/Prelaying_Covs_Z.shp", delete_layer = T)
 
 ### Laying Selection
 lay.vhf.used <- st_read("./GIS/laying.vhf.used.points.shp") %>%
@@ -431,10 +431,10 @@ sfStop()
 
 laying.covs <- cbind(laying.points, laying.extract) %>%
   filter(Water == 0)
-st_write(laying.covs, "./GIS/Laying_Covs.shp")
+st_write(laying.covs, "./GIS/Laying_Covs.shp", delete_layer = T)
 laying.covs.z <- laying.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
-st_write(laying.covs.z, "./GIS/Laying_Covs_Z.shp")
+st_write(laying.covs.z, "./GIS/Laying_Covs_Z.shp", delete_layer = T)
 
 ### Nest Site Selection
 nest.vhf.used <- st_read("./GIS/nest.vhf.used.points.shp") %>%
@@ -466,10 +466,10 @@ sfStop()
 
 nest.covs <- cbind(nest.points, nest.extract) %>%
   filter(Water == 0)
-st_write(nest.covs, "./GIS/Nest_Covs.shp")
+st_write(nest.covs, "./GIS/Nest_Covs.shp", delete_layer = T)
 nest.covs.z <- nest.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
-st_write(nest.covs.z, "./GIS/Nest_Covs_Z.shp")
+st_write(nest.covs.z, "./GIS/Nest_Covs_Z.shp", delete_layer = T)
 
 
 ### Nest Success 
@@ -494,10 +494,10 @@ colnames(nestsuccess.extract) <- names(rasterlist)
 sfStop()
 
 nestsuccess.covs <- cbind(nestsuccess.sf, nestsuccess.extract)
-st_write(nestsuccess.covs, "./GIS/NestSuccess_Covs.shp")
+st_write(nestsuccess.covs, "./GIS/NestSuccess_Covs.shp", delete_layer = T)
 nestsuccess.covs.z <- nestsuccess.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
-st_write(nestsuccess.covs.z, "./GIS/NestSuccess_Covs_Z.shp")
+st_write(nestsuccess.covs.z, "./GIS/NestSuccess_Covs_Z.shp", delete_layer = T)
 
 
 ### Hen Survival

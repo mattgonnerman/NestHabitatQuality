@@ -19,17 +19,17 @@ function(){#####################################################################
   w_PLSel[1:4] ~ ddirch(c(0.25,0.25,0.25,0.25))
 
   # Individual Random Effect
-  alpha_PLSel[i:NInd_PL] ~ dmnorm(mu_PL[1:NInd_PL], omega_PL[1:NInd_PL,1:NInd_PL])
-  for(i in 1:NInd_PL){
+  alpha_PLSel[1:NNest_PLSel] ~ dmnorm(mu_PL[1:NNest_PLSel], omega_PL[1:NNest_PLSel,1:NNest_PLSel])
+  omega_PL[1:NNest_PLSel,1:NNest_PLSel] ~ dwish(R_PL[,],NNest_PLSel)
+  for(i in 1:NNest_PLSel){
     mu_PL[i] <- 0
-    for(j in 1:NInd_PL){
-      omega_PL[i,j] ~ dwish(R_PL, NInd_PL)
-      R_PL[i,j] <- 0
+    for(j in 1:NNest_PLSel){
+      R_PL[i,j] <- ifelse(i==j, 1, 0)
     }
   }
-  
+
   # Random Error 
-  for(i in 1:NNest_PLSel){  
+  for(i in 1:NGrp_PLSel){  
     for(j in 1:11){
       err_PL[i,j] ~ dnorm(0, tau_PLerr) 
     }
@@ -42,7 +42,7 @@ function(){#####################################################################
     y_PL[i, 1:11] ~ dmulti(p_PL[i,1:11], 1)
     for(j in 1:11){
       p_PL[i,j] <- e_PL[i,j]/sum(wt_PL[i,1:11]*e_PL[i,1:11])
-      log(e_PL[i,j]) <- alpha[NestID_PL[i]] + beta_SC_PLSel*cov_PLSel[j,scale_PLSel,i] + err_PL[i,j]
+      log(e_PL[i,j]) <- alpha_PLSel[NestID_PL[i]] + beta_SC_PLSel*cov_PLSel[j,scale_PLSel,i] + err_PL[i,j]
     }
   }
 
@@ -60,17 +60,18 @@ function(){#####################################################################
   w_LSel[1:4] ~ ddirch(c(0.25,0.25,0.25,0.25))
   
   # Individual Random Effect
-  alpha_LSel[i:NInd_L] ~ dmnorm(mu_L[1:NInd_L], omega_L[1:NInd_L,1:NInd_L])
-  for(i in 1:NInd_L){
+  alpha_LSel[1:NNest_LSel] ~ dmnorm(mu_L[1:NNest_LSel], omega_L[1:NNest_LSel,1:NNest_LSel])
+  omega_L[1:NNest_LSel,1:NNest_LSel] ~ dwish(R_L[,],NNest_LSel)
+  for(i in 1:NNest_LSel){
     mu_L[i] <- 0
-    for(j in 1:NInd_L){
-      omega_L[i,j] ~ dwish(R_L, NInd_L)
-      R_L[i,j] <- 0
+    for(j in 1:NNest_LSel){
+      R_L[i,j] <- ifelse(i==j, 1, 0)
     }
   }
   
+  
   # Random Error 
-  for(i in 1:NNest_LSel){  
+  for(i in 1:NGrp_LSel){  
     for(j in 1:11){
       err_L[i,j] ~ dnorm(0, tau_Lerr) 
     }
@@ -83,7 +84,7 @@ function(){#####################################################################
     y_L[i, 1:11] ~ dmulti(p_L[i,1:11], 1)
     for(j in 1:11){
       p_L[i,j] <- e_L[i,j]/sum(wt_L[i,1:11]*e_L[i,1:11])
-      log(e_L[i,j]) <- alpha[NestID_L[i]] + beta_SC_LSel*cov_LSel[j,scale_LSel,i] + err_L[i,j]
+      log(e_L[i,j]) <- alpha_LSel[NestID_L[i]] + beta_SC_LSel*cov_LSel[j,scale_LSel,i] + err_L[i,j]
     }
   }
   
@@ -100,18 +101,18 @@ function(){#####################################################################
   scale_NSel ~ dcat(w_NSel[1:4])
   w_NSel[1:4] ~ ddirch(c(0.25,0.25,0.25,0.25))
   
-  # Individual Random Effect
-  alpha_NSel[i:NInd_N] ~ dmnorm(mu_N[1:NInd_N], omega_N[1:NInd_N,1:NInd_N])
-  for(i in 1:NInd_N){
-    mu_N[i] <- 0
-    for(j in 1:NInd_N){
-      omega_N[i,j] ~ dwish(R_N, NInd_N)
-      R_N[i,j] <- 0
-    }
-  }
+  # # Individual Random Effect
+  # for(i in 1:NNest_NSel){
+  #   alpha_NSel[i] ~ dmnorm(mu_N[1:NNest_NSel], omega_N[1:NNest_NSel,1:NNest_NSel])
+  #   mu_N[i] <- 0
+  #   for(j in 1:NNest_NSel){
+  #     omega_N[i,j] ~ dwish(R_N, NNest_NSel)
+  #     R_N[i,j] <- 0
+  #   }
+  # }
   
   # Random Error 
-  for(i in 1:NNest_NSel){  
+  for(i in 1:NGrp_NSel){  
     for(j in 1:11){
       err_N[i,j] ~ dnorm(0, tau_Nerr) 
     }
@@ -124,7 +125,8 @@ function(){#####################################################################
     y_N[i, 1:11] ~ dmulti(p_N[i,1:11], 1)
     for(j in 1:11){
       p_N[i,j] <- e_N[i,j]/sum(wt_N[i,1:11]*e_N[i,1:11])
-      log(e_N[i,j]) <- alpha[NestID_N[i]] + beta_SC_NSel*cov_NSel[j,scale_NSel,i] + err_N[i,j]
+      # log(e_N[i,j]) <- alpha_NSel[NestID_N[i]] + beta_SC_NSel*cov_NSel[j,scale_NSel,i] + err_N[i,j]
+      log(e_N[i,j]) <- beta_SC_NSel*cov_NSel[j,scale_NSel,i] + err_N[i,j]
     }
   }
   
