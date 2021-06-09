@@ -121,10 +121,10 @@ killed.on.nest <- killed.on.nest[-which(killed.on.nest$NestID %in% flushed.aband
 ns_eh_matrix <- monitoring.clean %>% dcast(NestID ~ RefDate, value.var = "Status")
 
 ns_eh_failnomort <- ns_eh_matrix[2:ncol(ns_eh_matrix)]
+
+#Flip Success history in prep for making failure type histories
 ns_eh_failnomort <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 1, NA))
 ns_eh_failmort <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 0, NA))
-ns_eh_failflush <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 0, NA))
-
 
 row.mort <- which(ns_eh_matrix$NestID %in% killed.on.nest$NestID)
 row.flush <- which(ns_eh_matrix$NestID %in% flushed.aband$NestID)
@@ -134,13 +134,13 @@ for(i in 1:nrow(ns_eh_failnomort)){
 
     ns_eh_failmort[i,j] <- ifelse(i %in% row.mort & ns_eh_failnomort[i,j] == 1, 1,
                                   ifelse(i %in% row.flush & ns_eh_failnomort[i,j] == 1, 0, ns_eh_failmort[i,j]))
-    ns_eh_failflush[i,j] <- ifelse(i %in% row.mort & ns_eh_failnomort[i,j] == 1, 0, 
-                                   ifelse(i %in% row.flush & ns_eh_failnomort[i,j] == 1, 1, ns_eh_failflush[i,j]))
+    ns_eh_matrix[i,j+1] <- ifelse(i %in% row.flush & ns_eh_matrix[i,j+1] == 0, NA, ns_eh_matrix[i,j+1])
     ns_eh_failnomort[i,j] <- ifelse(i %in% row.mort & ns_eh_failnomort[i,j] == 1, 0,
                                     ifelse(i %in% row.flush & ns_eh_failnomort[i,j] == 1, 0, ns_eh_failnomort[i,j]))
     
   } #j
 } #i
+
 
 
 ########################
@@ -149,6 +149,8 @@ for(i in 1:nrow(ns_eh_failnomort)){
 ### Vectorize encounter histories ###
 # Translate visitation history to exposure length history
 ns_eh_matrix_edit <- ns_eh_matrix[,-c(1)]
+ns_eh_failmort[is.na(ns_eh_matrix_edit)] <- NA
+ns_eh_failnomort[is.na(ns_eh_matrix_edit)] <- NA
 ns_n_ind <- nrow(ns_eh_matrix)
 ns_exposure <- ncol(ns_eh_matrix)-1
 
@@ -162,11 +164,12 @@ ns_failnomort <- ns_failnomort1[!is.na(ns_failnomort1)]
 ns_failmort1 <- as.vector(t(ns_eh_failmort))
 ns_failmort <- ns_failmort1[!is.na(ns_failmort1)]
 
-ns_failflush1 <- as.vector(t(ns_eh_failflush))
-ns_failflush <- ns_failflush1[!is.na(ns_failflush1)]
+# ns_failflush1 <- as.vector(t(ns_eh_failflush))
+# ns_failflush <- ns_failflush1[!is.na(ns_failflush1)]
 
 #Format as a matrix for JAGS model
-ns_succ.mat <- matrix(c(ns_succ, ns_failnomort, ns_failmort, ns_failflush), ncol = 4, nrow = length(ns_failnomort), byrow = F)
+# ns_succ.mat <- matrix(c(ns_succ, ns_failnomort, ns_failmort, ns_failflush), ncol = 4, nrow = length(ns_failnomort), byrow = F)
+ns_succ.mat <- matrix(c(ns_succ, ns_failnomort, ns_failmort), ncol = 3, nrow = length(ns_failnomort), byrow = F)
 
 #Double check that all rows sum to 1 and the columns sum = length of number in each group
 rowSums(ns_succ.mat)

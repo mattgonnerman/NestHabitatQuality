@@ -69,15 +69,15 @@ par.monitor <- c(
   "intercept_HDSR",
   "beta_SC_HDSR",
   "sigma_HDSR",
-  "intercept_FDSR",
-  "beta_SC_FDSR",
-  "sigma_FDSR",
+  # "intercept_FDSR",
+  # "beta_SC_FDSR",
+  # "sigma_FDSR",
   "scale_NDSR",
   "w_NDSR",
   "scale_HDSR",
   "w_HDSR",
-  "scale_FDSR",
-  "w_FDSR",
+  # "scale_FDSR",
+  # "w_FDSR",
 
   ### Nesting Habitat Quality Metric ###
   "NHQ"

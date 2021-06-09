@@ -29,7 +29,7 @@ examplenests.df <- pl.covs %>%
   group_by(NestID) %>%
   summarize(Total = n()) %>%
   arrange(Total) %>%
-  slice(1:2)
+  slice(1:5)
 
 pl.covs <- pl.covs %>% filter(NestID %in% examplenests.df$NestID)
 
@@ -107,7 +107,7 @@ examplenests.df <- l.covs %>%
   group_by(NestID) %>%
   summarize(Total = n()) %>%
   arrange(Total) %>%
-  slice(1:2)
+  slice(1:5)
 
 l.covs <- l.covs %>% filter(NestID %in% examplenests.df$NestID)
 
@@ -234,8 +234,8 @@ cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, co
 # # ##################################################################################
 # # ### Habitat Covariates
 # # source(file = "NestHabitatQuality - 1d Habitat Covariates Data.R")
-# 
-# 
+
+
 ##################################################################################
 ### Full Raster Values for Final NHQ metric
 NHQ.covs <- st_read("./GIS/NHQ_covs.shp")

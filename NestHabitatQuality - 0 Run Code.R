@@ -1,17 +1,11 @@
-###
-setwd("E:/GitHub/NestHabitatQuality")
-
 ### Data Preperation
-# # Nest Site Selection
+# Nest Site Selection
 # source(file = "NestHabitatQuality - 1a Selection Data.R")
-# 
-# # Nest Success
+ 
+# Nest Success
 source(file = "NestHabitatQuality - 1b Nest Success Data.R")
-# 
-# # Hen Survival
-# source(file = "NestHabitatQuality - 1c Hen Survival Data.R")
-# 
-# # Habitat Covariates
+
+# Habitat Covariates
 # source(file = "NestHabitatQuality - 1d Habitat Covariates Data.R")
 
 
@@ -60,7 +54,7 @@ for(i in 1){
   print(paste("Run", covname, "End Time:", Sys.time(), sep = " "))
 }
 
-NHQ_output
+write.csv(NHQ_output$BUGSoutput$summary, "testoutput.csv")
 
 ### Examine Model Outputs
 #Create NHQ Raster from Outputs
