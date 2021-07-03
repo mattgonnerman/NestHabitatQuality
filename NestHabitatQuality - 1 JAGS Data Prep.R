@@ -23,17 +23,17 @@ pl.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
   arrange(NestID, Used)
 
 
-### FOR TESTING PURPOSES ###
-#Subset prelaying points to only a few individuals
-examplenests.df <- pl.covs %>%
-  group_by(NestID) %>%
-  summarize(Total = n()) %>%
-  arrange(Total) %>%
-  slice(1:5)
-
-pl.covs <- pl.covs %>% filter(NestID %in% examplenests.df$NestID)
-
-### FOR TESTING PURPOSES ###
+# ### FOR TESTING PURPOSES ###
+# #Subset prelaying points to only a few individuals
+# examplenests.df <- pl.covs %>%
+#   group_by(NestID) %>%
+#   summarize(Total = n()) %>%
+#   arrange(Total) %>%
+#   slice(1:5)
+# 
+# pl.covs <- pl.covs %>% filter(NestID %in% examplenests.df$NestID)
+# 
+# ### FOR TESTING PURPOSES ###
 
 
 # prelaying.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
@@ -101,17 +101,17 @@ cov_PLSel <- array(as.numeric(unlist(cov_PLSel)), dim=c(11, 4, length(cov_PLSel)
 l.covs <- st_read("./GIS/Laying_Covs.shp") %>%
   arrange(NestID, Used)
 
-### FOR TESTING PURPOSES ###
-#Subset prelaying points to only a few individuals
-examplenests.df <- l.covs %>%
-  group_by(NestID) %>%
-  summarize(Total = n()) %>%
-  arrange(Total) %>%
-  slice(1:5)
-
-l.covs <- l.covs %>% filter(NestID %in% examplenests.df$NestID)
-
-### FOR TESTING PURPOSES ###
+# ### FOR TESTING PURPOSES ###
+# #Subset prelaying points to only a few individuals
+# examplenests.df <- l.covs %>%
+#   group_by(NestID) %>%
+#   summarize(Total = n()) %>%
+#   arrange(Total) %>%
+#   slice(1:5)
+# 
+# l.covs <- l.covs %>% filter(NestID %in% examplenests.df$NestID)
+# 
+# ### FOR TESTING PURPOSES ###
 
 # yL <- laying.covs$Used
 # weightsL <- ifelse(yL == "0", w, 1)
@@ -241,12 +241,12 @@ cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, co
 NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
 NHQ.covs <- st_transform(NHQ.covs, 32619)
 
-# #>>>For testing purposes, filter to small portion of study area
-testextent <- st_read("./GIS/testrasterextent.shp") %>%
-  mutate(Test = 1)
-testextent <- st_transform(testextent, 32619)
-testextent <- st_buffer(testextent, 5000)
-NHQ.covs <- st_intersection(NHQ.covs,testextent)
-#<<<For testing purposes, filter to small portion of study area
+# # #>>>For testing purposes, filter to small portion of study area
+# testextent <- st_read("./GIS/testrasterextent.shp") %>%
+#   mutate(Test = 1)
+# testextent <- st_transform(testextent, 32619)
+# testextent <- st_buffer(testextent, 5000)
+# NHQ.covs <- st_intersection(NHQ.covs,testextent)
+# #<<<For testing purposes, filter to small portion of study area
 
 cov_NHQ <- as.matrix(st_drop_geometry(NHQ.covs[,which(grepl(covname, colnames(NHQ.covs)))]))

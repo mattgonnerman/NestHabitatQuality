@@ -1,3 +1,5 @@
+##CONFIRM BACKUP
+
 ### Data Preperation
 # Nest Site Selection
 # source(file = "NestHabitatQuality - 1a Selection Data.R")
@@ -39,22 +41,19 @@ for(i in 1){
   #Save Model to list
   NHQ_output_list[[i]] <- NHQ_output
   
-  # # compute wAIC for model with intercept only
-  # NHQ_samples <- jags.samples(NHQ_output$model, 
-  #                            c("WAIC","deviance"), 
-  #                            type = "mean", 
-  #                            n.iter = ni,
-  #                            n.burnin = nb,
-  #                            n.thin = nt)
-  # NHQ_samples$p_waic <- NHQ_samples$WAIC
-  # NHQ_samples$waic <- NHQ_samples$deviance + NHQ_samples$p_waic
-  # tmp <- sapply(NHQ_samples, sum)
-  # NHQ_waic[[i]] <- round(c(waic = tmp[["waic"]], p_waic = tmp[["p_waic"]]),1)
+  save(NHQ_output, file = paste(covname, "JAGSmodel.RData", sep = ""))
+  
+  write.csv(NHQ_output$BUGSoutput$summary, paste(covname, "outputs.csv", sep = ""))
   
   print(paste("Run", covname, "End Time:", Sys.time(), sep = " "))
 }
 
-write.csv(NHQ_output$BUGSoutput$summary, "testoutput.csv")
+mcall <- rbind(out1$mcmc[[1]], out1$mcmc[[2]],
+               out1$mcmc[[3]])
+dim(mcall)
+head(mcall)
+mc_ll <- mcall[,paste0("loglik[",1:100,"]")]
+
 
 ### Examine Model Outputs
 #Create NHQ Raster from Outputs

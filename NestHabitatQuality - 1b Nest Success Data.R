@@ -110,12 +110,26 @@ monitoring.lastdayon <- monitoring.clean %>%
   arrange(desc(Date)) %>%
   slice(1L)
 
-flushed.aband <- merge(monitoring.lastdayon, flush.date, by = c("NestID", "Date"))
+flushed.aband <- merge(monitoring.lastdayon, flush.date, by = c("NestID", "Date")) %>%
+  dplyr::select(NestID, LastDayOn = Date)
+
+# First Day Off Nest
+monitoring.firstdayoff <- monitoring.clean %>% 
+  filter(Status == 0) %>%
+  group_by(NestID) %>%
+  arrange(Date) %>%
+  slice(1L) %>%
+  dplyr::select(NestID, FirstDayOff = Date)
+
+flushed.diff <- merge(flushed.aband, monitoring.firstdayoff, all.x = T) %>%
+  mutate(Difference = FirstDayOff - LastDayOn)
+
+flush.final <- flushed.diff %>% filter(Difference < 4)
 
 #Check If Hens are in both flush and death lists
-which(killed.on.nest$NestID %in% flushed.aband$NestID)
-which(flushed.aband$NestID %in% killed.on.nest$NestID)
-killed.on.nest <- killed.on.nest[-which(killed.on.nest$NestID %in% flushed.aband$NestID),]
+which(killed.on.nest$NestID %in% flush.final$NestID)
+which(flush.final$NestID %in% killed.on.nest$NestID)
+killed.on.nest <- killed.on.nest[-which(killed.on.nest$NestID %in% flush.final$NestID),]
   
 #Transform into EH format
 ns_eh_matrix <- monitoring.clean %>% dcast(NestID ~ RefDate, value.var = "Status")
@@ -127,7 +141,7 @@ ns_eh_failnomort <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 
 ns_eh_failmort <- ifelse(ns_eh_failnomort == 1, 0, ifelse(ns_eh_failnomort == 0, 0, NA))
 
 row.mort <- which(ns_eh_matrix$NestID %in% killed.on.nest$NestID)
-row.flush <- which(ns_eh_matrix$NestID %in% flushed.aband$NestID)
+row.flush <- which(ns_eh_matrix$NestID %in% flush.final$NestID)
 
 for(i in 1:nrow(ns_eh_failnomort)){
   for(j in 1:ncol(ns_eh_failnomort)){
