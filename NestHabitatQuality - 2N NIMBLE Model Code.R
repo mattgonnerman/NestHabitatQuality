@@ -254,7 +254,7 @@ NHQ.constants <- list(
 )
 
 ### Parameters monitors
-par.monitor <- c(
+NHQ.monitor <- c(
   ### PreLaying Selection ###
   "beta_SC_PLSel",
   "sigma_PLSel",
@@ -293,20 +293,31 @@ par.monitor <- c(
 
 
 ### Run Model (Single Core)
+#Single Line Invocation
+NHQ.MCMC.final <- nimbleMCMC(code = NHQ.code,
+                              constants = NHQ.constants,
+                              data = NHQ.data,
+                              niter = ni,
+                              nchain = nc,
+                              summary = T,
+                              WAIC = T,
+                              monitors = NHQ.monitor)
+
+#Multiple Line Invocation
 NHQ.model <- nimbleModel(code = NHQ.code,
                          name = paste(covname, "NIMBLE", sep = ""),
                          constants = NHQ.constants,
                          data = NHQ.data)
-
+NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
 NHQ.conf <- configureMCMC(model = NHQ.model,
                           monitors = par.monitor)
 
 NHQ.MCMC <- buildMCMC(NHQ.conf)
-NHQ.comp.MCMC <- compileNimble(NHQ.MCMC, project = NHQ.model)
+NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
 
 niter <- 100
 nchains 
-samples <- runMCMC(NHQ.comp.MCMC,
+NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
                    niter = ni,
                    nchain = nc,
                    summary = T,
