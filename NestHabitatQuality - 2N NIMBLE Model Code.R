@@ -14,7 +14,7 @@ NHQ.code <- nimbleCode({
   # BLISS 
   dirpw <- c(0.25,0.25,0.25,0.25)
   scale_PLSel ~ dcat(w_PLSel[1:4])
-  w_PLSel[1:4] ~ ddirch(dirpw)
+  w_PLSel[1:4] ~ ddirch(dirpw[1:4])
   
   # Individual Random Effect (Intercept)
   alpha_PL_Int[1:NNest_PLSel] ~ dmnorm(mu_PL_I[1:NNest_PLSel], omega_PL_I[1:NNest_PLSel,1:NNest_PLSel])
@@ -65,7 +65,7 @@ NHQ.code <- nimbleCode({
   
   # BLISS 
   scale_LSel ~ dcat(w_LSel[1:4])
-  w_LSel[1:4] ~ ddirch(dirpw)
+  w_LSel[1:4] ~ ddirch(dirpw[1:4])
   
   # Individual Random Effect (Intercept)
   alpha_L_Int[1:NNest_LSel] ~ dmnorm(mu_L_I[1:NNest_LSel], omega_L_I[1:NNest_LSel,1:NNest_LSel])
@@ -117,7 +117,7 @@ NHQ.code <- nimbleCode({
   
   # BLISS 
   scale_NSel ~ dcat(w_NSel[1:4])
-  w_NSel[1:4] ~ ddirch(dirpw)
+  w_NSel[1:4] ~ ddirch(dirpw[1:4])
   
   # Random Error 
   for(i in 1:NGrp_NSel){  
@@ -155,9 +155,9 @@ NHQ.code <- nimbleCode({
 
   # BLISS
   scale_NDSR ~ dcat(w_NDSR[1:4])
-  w_NDSR[1:4] ~ ddirch(dirpw)
+  w_NDSR[1:4] ~ ddirch(dirpw[1:4])
   scale_HDSR ~ dcat(w_HDSR[1:4])
-  w_HDSR[1:4] ~ ddirch(dirpw)
+  w_HDSR[1:4] ~ ddirch(dirpw[1:4])
   
   #Likelihood
   for(n in 1:NDSR_nvisit){
