@@ -1,6 +1,7 @@
 ### Nimble Attempt
 require(nimble)
 
+### Model in BUGS code adjusted for NIMBLE
 NHQ.code <- nimbleCode({
   #Model 
   ### Prelaying Habitat Selection
@@ -201,7 +202,7 @@ NHQ.code <- nimbleCode({
     }
 })
 
-#Data for NIMBLE
+### Data for NIMBLE
 NHQ.data <- list(
   ### PreLaying Selection ###
   y_PL = y_PL, # Used/Available Specifications
@@ -227,7 +228,7 @@ NHQ.data <- list(
   cov_NHQ = cov_NHQ
 )
 
-#Constants for NIMBLE
+### Constants for NIMBLE
 NHQ.constants <- list(
   ### PreLaying Selection ###
   NestID_PL = Ind_PLSel, # Numeric Nest ID
@@ -252,7 +253,50 @@ NHQ.constants <- list(
   nNHQ = nrow(cov_NHQ)
 )
 
-NHQ.model <- nimbleModel(code = NHQ.code,
-                         name = paste(covname, "NIMBLE", sep = ""),
-                         constants = NHQ.constants,
-                         data = NHQ.data)
+### Parameters monitors
+par.monitor <- c(
+  ### PreLaying Selection ###
+  "intercept_PLSel",
+  "beta_SC_PLSel",
+  "sigma_PLSel",
+  "scale_PLSel",
+  "w_PLSel",
+  
+  ### Laying Selection ###
+  "intercept_LSel",
+  "beta_SC_LSel",
+  "sigma_LSel",
+  "scale_LSel",
+  "w_LSel",
+  
+  ### Nest Selection ###
+  "intercept_NSel",
+  "beta_SC_NSel",
+  "sigma_NSel",
+  "scale_NSel",
+  "w_NSel",
+  
+  ### Nest Success ###
+  "intercept_NDSR",
+  "beta_SC_NDSR",
+  "sigma_NDSR",
+  "intercept_HDSR",
+  "beta_SC_HDSR",
+  "sigma_HDSR",
+  "scale_NDSR",
+  "w_NDSR",
+  "scale_HDSR",
+  "w_HDSR",
+  
+  ### Nesting Habitat Quality Metric ###
+  "NHQ",
+  "PLS",
+  "LS", "NS", "SuccP"
+)
+
+NHQ.model <- nimbleMCMC(code = NHQ.code,
+                        constants = NHQ.constants,
+                        data = NHQ.data,
+                        nchains = 2, niter = 100,
+                        summary = TRUE, WAIC = TRUE,
+                        monitors = par.monitor)
