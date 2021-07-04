@@ -1,4 +1,5 @@
 ##CONFIRM BACKUP
+require(parallel)
 
 ### Data Preperation
 # Nest Site Selection
@@ -47,12 +48,6 @@ for(i in 1){
   
   print(paste("Run", covname, "End Time:", Sys.time(), sep = " "))
 }
-
-mcall <- rbind(out1$mcmc[[1]], out1$mcmc[[2]],
-               out1$mcmc[[3]])
-dim(mcall)
-head(mcall)
-mc_ll <- mcall[,paste0("loglik[",1:100,"]")]
 
 
 ### Examine Model Outputs
