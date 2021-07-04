@@ -294,9 +294,57 @@ par.monitor <- c(
   "LS", "NS", "SuccP"
 )
 
-NHQ.model <- nimbleMCMC(code = NHQ.code,
-                        constants = NHQ.constants,
-                        data = NHQ.data,
-                        nchains = 2, niter = 100,
-                        summary = TRUE, WAIC = TRUE,
-                        monitors = par.monitor)
+
+### Run Model (Single Core)
+NHQ.model <- nimbleModel(code = NHQ.code,
+                         name = paste(covname, "NIMBLE", sep = ""),
+                         constants = NHQ.constants,
+                         data = NHQ.data)
+
+NHQ.conf <- configureMCMC(model = NHQ.model,
+                          monitors = par.monitor)
+
+NHQ.MCMC <- buildMCMC(NHQ.conf)
+NHQ.comp.MCMC <- compileNimble(NHQ.MCMC, project = NHQ.model)
+
+niter <- 100
+nchains 
+samples <- runMCMC(NHQ.comp.MCMC,
+                   niter = ni,
+                   nchain = nc,
+                   summary = T,
+                   WAIC = T)
+
+### Run Model (Parallel)
+require(parallel)
+this_cluster <- makeCluster(4)
+run_MCMC_allcode <- function(data, code, constants) {
+  require(nimble)
+  
+  NHQ.model <- nimbleModel(code = code,
+                           name = paste(covname, "NIMBLE", sep = ""),
+                           constants = constants,
+                           data = data)
+  NHQ.comp.model <- compileNimble(NHQ.model)
+  NHQ.MCMC <- buildMCMC(NHQ.comp.model)
+  NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
+  
+  results <- runMCMC(NHQ.comp.MCMC,
+                     niter = ni,
+                     nchain = nc,
+                     summary = T,
+                     WAIC = T)
+  
+  return(results)
+}
+
+chain_output <- parLapply(cl = this_cluster,
+                          X = 1:4, 
+                          fun = run_MCMC_allcode, 
+                          data = NHQ.data,
+                          code = NHQ.code,
+                          constants = NHQ.constants)
+
+# It's good practice to close the cluster when you're done with it.
+stopCluster(this_cluster)
+
