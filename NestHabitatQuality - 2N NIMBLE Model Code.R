@@ -12,7 +12,7 @@ NHQ.code <- nimbleCode({
   sigma_PLSel ~ dunif(0,50)
   
   # BLISS 
-  dirpw <- c(0.25,0.25,0.25,0.25)
+  dirpw[1:4] <- c(0.25,0.25,0.25,0.25)
   scale_PLSel ~ dcat(w_PLSel[1:4])
   w_PLSel[1:4] ~ ddirch(dirpw[1:4])
   
@@ -256,21 +256,18 @@ NHQ.constants <- list(
 ### Parameters monitors
 par.monitor <- c(
   ### PreLaying Selection ###
-  "intercept_PLSel",
   "beta_SC_PLSel",
   "sigma_PLSel",
   "scale_PLSel",
   "w_PLSel",
   
   ### Laying Selection ###
-  "intercept_LSel",
   "beta_SC_LSel",
   "sigma_LSel",
   "scale_LSel",
   "w_LSel",
   
   ### Nest Selection ###
-  "intercept_NSel",
   "beta_SC_NSel",
   "sigma_NSel",
   "scale_NSel",
@@ -316,35 +313,35 @@ samples <- runMCMC(NHQ.comp.MCMC,
                    WAIC = T)
 
 ### Run Model (Parallel)
-require(parallel)
-this_cluster <- makeCluster(4)
-run_MCMC_allcode <- function(data, code, constants) {
-  require(nimble)
-  
-  NHQ.model <- nimbleModel(code = code,
-                           name = paste(covname, "NIMBLE", sep = ""),
-                           constants = constants,
-                           data = data)
-  NHQ.comp.model <- compileNimble(NHQ.model)
-  NHQ.MCMC <- buildMCMC(NHQ.comp.model)
-  NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
-  
-  results <- runMCMC(NHQ.comp.MCMC,
-                     niter = ni,
-                     nchain = nc,
-                     summary = T,
-                     WAIC = T)
-  
-  return(results)
-}
-
-chain_output <- parLapply(cl = this_cluster,
-                          X = 1:4, 
-                          fun = run_MCMC_allcode, 
-                          data = NHQ.data,
-                          code = NHQ.code,
-                          constants = NHQ.constants)
-
-# It's good practice to close the cluster when you're done with it.
-stopCluster(this_cluster)
+# require(parallel)
+# this_cluster <- makeCluster(4)
+# run_MCMC_allcode <- function(data, code, constants) {
+#   require(nimble)
+#   
+#   NHQ.model <- nimbleModel(code = code,
+#                            name = paste(covname, "NIMBLE", sep = ""),
+#                            constants = constants,
+#                            data = data)
+#   NHQ.comp.model <- compileNimble(NHQ.model)
+#   NHQ.MCMC <- buildMCMC(NHQ.comp.model)
+#   NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
+#   
+#   results <- runMCMC(NHQ.comp.MCMC,
+#                      niter = ni,
+#                      nchain = nc,
+#                      summary = T,
+#                      WAIC = T)
+#   
+#   return(results)
+# }
+# 
+# chain_output <- parLapply(cl = this_cluster,
+#                           X = 1:4, 
+#                           fun = run_MCMC_allcode, 
+#                           data = NHQ.data,
+#                           code = NHQ.code,
+#                           constants = NHQ.constants)
+# 
+# # It's good practice to close the cluster when you're done with it.
+# stopCluster(this_cluster)
 
