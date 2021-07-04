@@ -1,7 +1,7 @@
 ### Load Relevant R packages 
 lapply(c('dplyr', 'sf', 'move', 'raster', 'snowfall', 'lubridate', 'ggplot2', 'foreach', 'doParallel', 'reshape2'), require, character.only = T)
 
-# memory.limit(56000)
+memory.limit(56000)
 
 #Weight for logistic regression
 w <- 10000

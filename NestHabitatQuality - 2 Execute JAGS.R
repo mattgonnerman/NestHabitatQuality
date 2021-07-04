@@ -80,9 +80,7 @@ par.monitor <- c(
   # "w_FDSR",
 
   ### Nesting Habitat Quality Metric ###
-  "NHQ",
-  "PLS",
-  "LS", "NS", "SuccP"
+  "NHQ" #,"PLS","LS", "NS", "SuccP"
 )
 
 
