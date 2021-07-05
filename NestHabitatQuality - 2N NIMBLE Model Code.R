@@ -22,7 +22,7 @@ NHQ.code <- nimbleCode({
   for(i in 1:NNest_PLSel){
     mu_PL_I[i] <- 0
     for(j in 1:NNest_PLSel){
-      R_PL_I[i,j] <- ifelse(i==j, 1, 0)
+      R_PL_I[i,j] <- ifelse(i==j, 1, 0.1)
     }
   }
   
@@ -32,7 +32,7 @@ NHQ.code <- nimbleCode({
   for(i in 1:NNest_PLSel){
     mu_PL_S[i] <- 0
     for(j in 1:NNest_PLSel){
-      R_PL_S[i,j] <- ifelse(i==j, 1, 0)
+      R_PL_S[i,j] <- ifelse(i==j, 1, 0.1)
     }
   }
   
@@ -73,7 +73,7 @@ NHQ.code <- nimbleCode({
   for(i in 1:NNest_LSel){
     mu_L_I[i] <- 0
     for(j in 1:NNest_LSel){
-      R_L_I[i,j] <- ifelse(i==j, 1, 0)
+      R_L_I[i,j] <- ifelse(i==j, 1, 0.1)
     }
   }
   
@@ -83,7 +83,7 @@ NHQ.code <- nimbleCode({
   for(i in 1:NNest_LSel){
     mu_L_S[i] <- 0
     for(j in 1:NNest_LSel){
-      R_L_S[i,j] <- ifelse(i==j, 1, 0)
+      R_L_S[i,j] <- ifelse(i==j, 1, 0.1)
     }
   }
   
@@ -253,6 +253,54 @@ NHQ.constants <- list(
   nNHQ = nrow(cov_NHQ)
 )
 
+NHQ.initial <- list(
+  ### PreLaying Selection ###
+  y_PL = y_PL, # Used/Available Specifications
+  wt_PL = weightsPL, #Weights for IWLR
+  cov_PLSel = cov_PLSel, # Spatial Covariates (3Dim Array)
+  
+  ### Laying Selection ###
+  y_L = y_L, # Used/Available Specifications
+  wt_L = weightsL, #Weights for IWLR
+  cov_LSel = cov_LSel, # Spatial Covariates (3Dim Array)
+  
+  ### Nesting Selection ###
+  y_N = y_N, # Used/Available Specifications
+  wt_N = weightsN, #Weights for IWLR
+  cov_NSel = cov_NSel, # Spatial Covariates (3Dim Array)
+  
+  ### Nest Success ###
+  NDSR_succ = ns_succ.mat,
+  NDSR_interval = ns_interval,
+  cov_NDSR = cov_NDSR,
+  
+  ### Nesting Habitat Quality Metric ###
+  cov_NHQ = cov_NHQ,
+  ### PreLaying Selection ###
+  NestID_PL = Ind_PLSel, # Numeric Nest ID
+  NGrp_PLSel = NInd_PLSel, # Count of Used/Available Groups
+  NNest_PLSel = N_PLSel, # Count of Individual Nests
+  
+  ### Laying Selection ###
+  NestID_L = Ind_LSel, # Numeric Nest ID
+  NGrp_LSel = NInd_LSel, # Count of Used/Available Groups
+  NNest_LSel = N_LSel, # Count of Individual Nests
+  
+  ### Nesting Selection ###
+  NestID_N = Ind_NSel, # Numeric Nest ID
+  NGrp_NSel = NInd_NSel, # Count of Used/Available Groups
+  NNest_NSel = N_NSel, # Count of Individual Nests
+  
+  ### Nest Success ###
+  NDSR_nvisit = length(ns_succ),
+  NDSR_ID = ns_ID,
+  
+  ### Nesting Habitat Quality Metric ###
+  nNHQ = nrow(cov_NHQ)
+)
+
+
+
 ### Parameters monitors
 NHQ.monitor <- c(
   ### PreLaying Selection ###
@@ -295,24 +343,25 @@ NHQ.monitor <- c(
 ### Run Model (Single Core)
 #Single Line Invocation
 NHQ.MCMC.final <- nimbleMCMC(code = NHQ.code,
-                              constants = NHQ.constants,
-                              data = NHQ.data,
-                              niter = ni,
-                              nchain = nc,
-                              summary = T,
-                              WAIC = T,
-                              monitors = NHQ.monitor)
+                             constants = NHQ.constants,
+                             data = NHQ.data,
+                             inits = NHQ.initial,
+                             niter = ni,
+                             nchain = nc,
+                             summary = T,
+                             WAIC = T,
+                             monitors = NHQ.monitor)
 
 #Multiple Line Invocation
 NHQ.model <- nimbleModel(code = NHQ.code,
                          name = paste(covname, "NIMBLE", sep = ""),
                          constants = NHQ.constants,
                          data = NHQ.data)
-NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
-NHQ.conf <- configureMCMC(model = NHQ.model,
-                          monitors = par.monitor)
+NHQ.comp.model <- compileNimble(NHQ.model)
 
-NHQ.MCMC <- buildMCMC(NHQ.conf)
+NHQ.conf.mcmc <- configureMCMC(model = NHQ.comp.model,
+                          monitors = par.monitor)
+NHQ.MCMC <- buildMCMC(NHQ.conf.mcmc)
 NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
 
 niter <- 100
