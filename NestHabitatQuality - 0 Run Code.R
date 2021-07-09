@@ -1,22 +1,10 @@
 ##CONFIRM BACKUP
-require(parallel)
-
-### Data Preperation
-# Nest Site Selection
-# source(file = "NestHabitatQuality - 1a Selection Data.R")
- 
-# Nest Success
-source(file = "NestHabitatQuality - 1b Nest Success Data.R")
-
-# Habitat Covariates
-# source(file = "NestHabitatQuality - 1d Habitat Covariates Data.R")
-
 
 ### Run JAGS Model
 #MCMC settings
-ni <- 100 #number of iterations
+ni <- 1000 #number of iterations
 nt <- 1 #thinning
-nb <- 10 #burn in period
+nb <- 100 #burn in period
 nc <- 1 #number of chains/parallel cores
 
 #Spatial Covariate Column Prefixes

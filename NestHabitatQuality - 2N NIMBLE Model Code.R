@@ -185,21 +185,21 @@ NHQ.code <- nimbleCode({
   }
   
   ## Habitat Quality ###
-  for(i in 1:nNHQ){
-    # Selection
-    PLS[i] <- exp(beta_SC_PLSel*cov_NHQ[i,scale_PLSel])
-    LS[i] <- exp(beta_SC_LSel*cov_NHQ[i,scale_LSel])
-    NS[i] <- exp(beta_SC_NSel*cov_NHQ[i,scale_NSel])
-    
-    # Failure Risk
-    PN[i] <- exp(intercept_NDSR + beta_SC_NDSR*cov_NHQ[i,scale_NDSR])
-    PH[i] <- exp(intercept_HDSR + beta_SC_HDSR*cov_NHQ[i,scale_HDSR])
-    # PF[i] <- exp(intercept_FDSR + beta_SC_FDSR*cov_NHQ[i,scale_FDSR])
-    SuccP[i] <- 1/(1 + PH[i] + PN[i]) #+ PF[i])
-    
-    #Nesting Habitat Quality Metric
-    NHQ[i] <- PLS[i]/max(PLS[1:nNHQ]) * LS[i]/max(LS[1:nNHQ]) * NS[i]/max(NS[1:nNHQ]) * SuccP[i]/max(SuccP[1:nNHQ])
-    }
+  # for(i in 1:nNHQ){
+  #   # Selection
+  #   PLS[i] <- exp(beta_SC_PLSel*cov_NHQ[i,scale_PLSel])
+  #   LS[i] <- exp(beta_SC_LSel*cov_NHQ[i,scale_LSel])
+  #   NS[i] <- exp(beta_SC_NSel*cov_NHQ[i,scale_NSel])
+  #   
+  #   # Failure Risk
+  #   PN[i] <- exp(intercept_NDSR + beta_SC_NDSR*cov_NHQ[i,scale_NDSR])
+  #   PH[i] <- exp(intercept_HDSR + beta_SC_HDSR*cov_NHQ[i,scale_HDSR])
+  #   # PF[i] <- exp(intercept_FDSR + beta_SC_FDSR*cov_NHQ[i,scale_FDSR])
+  #   SuccP[i] <- 1/(1 + PH[i] + PN[i]) #+ PF[i])
+  #   
+  #   #Nesting Habitat Quality Metric
+  #   NHQ[i] <- PLS[i]/max(PLS[1:nNHQ]) * LS[i]/max(LS[1:nNHQ]) * NS[i]/max(NS[1:nNHQ]) * SuccP[i]/max(SuccP[1:nNHQ])
+  #   }
 })
 
 ### Data for NIMBLE
@@ -227,6 +227,7 @@ NHQ.data <- list(
   ### Nesting Habitat Quality Metric ###
   cov_NHQ = cov_NHQ
 )
+
 
 ### Constants for NIMBLE
 NHQ.constants <- list(
@@ -310,13 +311,27 @@ NHQ.monitor <- c(
   "scale_NDSR",
   "w_NDSR",
   "scale_HDSR",
-  "w_HDSR",
+  "w_HDSR"
   
   ### Nesting Habitat Quality Metric ###
-  "NHQ"#,"PLS","LS", "NS", "SuccP"
+  # "NHQ"#,"PLS","LS", "NS", "SuccP"
 )
 
+save(NHQ.data, NHQ.constants, NHQ.initial, NHQ.monitor, NHQ.code, file = "NHQdata.RData")
 
+### Clear up workspace to make memory to see if this helps
+rm(list=setdiff(ls(),
+                c("NHQ.monitor", "NHQ.code", "NHQ.data", "NHQ.constants", "NHQ.initial",
+                "covname", "ni", 'nc', "nb")))
+gc()
+
+
+load(file = "NHQdata.RData")
+
+covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
+                 "BA_", "HT_", "SW_",
+                 "D2Edg_", "D2Rd_", "D2Rp_")
+covname = covSelnames[1]
 ### Run Model (Single Core)
 # #Single Line Invocation
 # NHQ.MCMC.final <- nimbleMCMC(code = NHQ.code,
@@ -330,11 +345,11 @@ NHQ.monitor <- c(
 #                              monitors = NHQ.monitor)
 
 #Multiple Line Invocation
+require(nimble)
 NHQ.model <- nimbleModel(code = NHQ.code,
                          name = paste(covname, "NIMBLE", sep = ""),
-                         constants = NHQ.constants,
-                         inits = NHQ.initial,
-                         data = NHQ.data)
+                         constants = NHQ.constants
+                         )
 NHQ.comp.model <- compileNimble(NHQ.model)
 NHQ.conf.mcmc <- configureMCMC(model = NHQ.comp.model,
                           monitors = NHQ.monitor)
