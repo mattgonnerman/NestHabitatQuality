@@ -185,23 +185,6 @@ NHQ.code <- nimbleCode({
   }
   
   # # Habitat Quality ###
-  # for(i in 1:nNHQ){
-  #   # Selection
-  #   PLS[i] <- exp(beta_SC_PLSel*cov_NHQ[i,scale_PLSel])
-  #   LS[i] <- exp(beta_SC_LSel*cov_NHQ[i,scale_LSel])
-  #   NS[i] <- exp(beta_SC_NSel*cov_NHQ[i,scale_NSel])
-  # 
-  #   # Failure Risk
-  #   PN[i] <- exp(intercept_NDSR + beta_SC_NDSR*cov_NHQ[i,scale_NDSR])
-  #   PH[i] <- exp(intercept_HDSR + beta_SC_HDSR*cov_NHQ[i,scale_HDSR])
-  #   # PF[i] <- exp(intercept_FDSR + beta_SC_FDSR*cov_NHQ[i,scale_FDSR])
-  #   SuccP[i] <- 1/(1 + PH[i] + PN[i]) #+ PF[i])
-  # 
-  #   #Nesting Habitat Quality Metric
-  #   NHQ[i] <- PLS[i]/max(PLS[1:nNHQ]) * LS[i]/max(LS[1:nNHQ]) * NS[i]/max(NS[1:nNHQ]) * SuccP[i]/max(SuccP[1:nNHQ])
-  #   }
-  # Habitat Quality ###
-  
   PLS_max <- max(exp(beta_SC_PLSel*cov_NHQ[1:nNHQ,scale_PLSel]))
   LS_max <- max(exp(beta_SC_LSel*cov_NHQ[1:nNHQ,scale_LSel]))
   N_max <- max(exp(beta_SC_NSel*cov_NHQ[1:nNHQ,scale_NSel]))
@@ -337,86 +320,6 @@ NHQ.dimensions <- list(
   cov_NSel = dim(NHQ.data$cov_NSel)
 )
 
-save(NHQ.data, NHQ.constants, NHQ.initial, NHQ.monitor, NHQ.code, NHQ.dimensions, file = "NHQdata.RData")
-
-### Clear up workspace to make memory to see if this helps
-rm(list=setdiff(ls(),
-                c("NHQ.monitor", "NHQ.code", "NHQ.data", "NHQ.constants", "NHQ.initial",
-                "covname", "ni", 'nc', "nb")))
-gc()
-
-
-load(file = "NHQdata.RData")
-
-covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
-                 "BA_", "HT_", "SW_",
-                 "D2Edg_", "D2Rd_", "D2Rp_")
-covname = covSelnames[1]
-#MCMC settings
-ni <- 1000 #number of iterations
-nt <- 1 #thinning
-nb <- 100 #burn in period
-nc <- 1 #number of chains/parallel cores
-
-### Run Model (Single Core)
-#Multiple Line Invocation
-require(nimble)
-NHQ.model <- nimbleModel(code = NHQ.code,
-                         constants = NHQ.constants,
-                         dimensions = NHQ.dimensions,
-                         inits = NHQ.initial,
-                         data = NHQ.data
-                         )
-NHQ.comp.model <- compileNimble(NHQ.model)
-NHQ.conf.mcmc <- configureMCMC(model = NHQ.comp.model,
-                          monitors = NHQ.monitor)
-NHQ.MCMC <- buildMCMC(NHQ.conf.mcmc)
-NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
-NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
-                   niter = ni,
-                   nburnin = nb,
-                   nchain = nc,
-                   summary = T,
-                   WAIC = T)
-write.csv(NHQ.samples.MCMC$summary)
-
-require(dplyr)
-require(stringr)
-NHQ.df <- as.data.frame(NHQ.samples.MCMC$summary) %>%
-  mutate(Names = row.names(NHQ.samples.MCMC$summary)) %>%
-  filter(grepl("NHQ", Names)) %>%
-  mutate(ID = as.numeric(gsub("\\D", "", Names)))
-
-### Run Model (Parallel)
-# require(parallel)
-# this_cluster <- makeCluster(4)
-# run_MCMC_allcode <- function(data, code, constants) {
-#   require(nimble)
-#   
-#   NHQ.model <- nimbleModel(code = code,
-#                            name = paste(covname, "NIMBLE", sep = ""),
-#                            constants = constants,
-#                            data = data)
-#   NHQ.comp.model <- compileNimble(NHQ.model)
-#   NHQ.MCMC <- buildMCMC(NHQ.comp.model)
-#   NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
-#   
-#   results <- runMCMC(NHQ.comp.MCMC,
-#                      niter = ni,
-#                      nchain = nc,
-#                      summary = T,
-#                      WAIC = T)
-#   
-#   return(results)
-# }
-# 
-# chain_output <- parLapply(cl = this_cluster,
-#                           X = 1:4, 
-#                           fun = run_MCMC_allcode, 
-#                           data = NHQ.data,
-#                           code = NHQ.code,
-#                           constants = NHQ.constants)
-# 
-# # It's good practice to close the cluster when you're done with it.
-# stopCluster(this_cluster)
+save(NHQ.data, NHQ.constants, NHQ.initial, NHQ.monitor, NHQ.code, NHQ.dimensions, 
+     file = paste("E:/Maine Drive/Analysis/NestHabitatQuality/",covname, "NHQdata.RData", sep = ""))
 

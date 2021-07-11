@@ -6,35 +6,10 @@ memory.limit(56000)
 #Weight for logistic regression
 w <- 10000
 
-# #Create function to put habitat covariates in correct order
-# covstoarray <- function(covlist){
-#   maxrows <- max(sapply(covlist, nrow))
-#   for(i in 1:length(covlist)){
-#     if(nrow(covlist[[i]]) != maxrows){covlist[[i]][(nrow(covlist[[i]])+1):maxrows,] <- NA}
-#   }
-#   
-#   array(as.numeric(unlist(covlist)), dim=c(nrow(covlist[[1]]), 4, length(covlist)))
-# }
-
 ##################################################################################
 ### Prelaying Selection
-# prelaying.covs <- st_read("./GIS/Prelaying_Covs_Z.shp")
-# pl.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
-#   arrange(NestID, Used)
-
-
-# ### FOR TESTING PURPOSES ###
-# #Subset prelaying points to only a few individuals
-# examplenests.df <- pl.covs %>%
-#   group_by(NestID) %>%
-#   summarize(Total = n()) %>%
-#   arrange(Total) %>%
-#   slice(1:5)
-# 
-# pl.covs <- pl.covs %>% filter(NestID %in% examplenests.df$NestID)
-# 
-# ### FOR TESTING PURPOSES ###
-
+pl.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
+  arrange(NestID, Used)
 
 pl.used <- pl.covs %>% filter(Used == 1) %>%
   group_by(NestID) %>%
@@ -72,36 +47,12 @@ foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "PairID2")
 Ind_PLSel <- as.numeric(as.factor(foridpair$NestID))
 N_PLSel <- length(unique(Ind_PLSel))
 
-cov_PLSel <- st_drop_geometry(pl.covs[,c(1,which(grepl(covname, colnames(pl.covs))))])
-
-cov_PLSel <- merge(st_drop_geometry(pl.used) %>% dplyr::select(NestID, PairID), cov_PLSel, all.y = T) %>%
-  mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-  group_by(ID) %>%
-  dplyr::select(-NestID, -PairID)
-
-cov_PLSel <- split(cov_PLSel[,1:4], cov_PLSel$ID)
-
-cov_PLSel <- array(as.numeric(unlist(cov_PLSel)), dim=c(11, 4, length(cov_PLSel)))
-# cov_PLSel <- covstoarray(cov_PLSel)
-
 
 ##################################################################################
 ### Laying Selection
-# laying.covs <- st_read("./GIS/Laying_Covs_Z.shp")
-# l.covs <- st_read("./GIS/Laying_Covs.shp") %>%
-#   arrange(NestID, Used)
-
-# ### FOR TESTING PURPOSES ###
-# #Subset prelaying points to only a few individuals
-# examplenests.df <- l.covs %>%
-#   group_by(NestID) %>%
-#   summarize(Total = n()) %>%
-#   arrange(Total) %>%
-#   slice(1:5)
-# 
-# l.covs <- l.covs %>% filter(NestID %in% examplenests.df$NestID)
-# 
-# ### FOR TESTING PURPOSES ###
+#Read the laying covariate point shapefile
+l.covs <- st_read("./GIS/Laying_Covs.shp") %>%
+  arrange(NestID, Used)
 
 l.used <- l.covs %>% filter(Used == 1) %>%
   group_by(NestID) %>%
@@ -137,17 +88,6 @@ foridpair2 <- l.df %>% dplyr::select(NestID, PairID2) %>% distinct()
 foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "PairID2")
 Ind_LSel <- as.numeric(as.factor(foridpair$NestID))
 N_LSel <- length(unique(Ind_LSel))
-
-cov_LSel <- st_drop_geometry(l.covs[,c(1,which(grepl(covname, colnames(l.covs))))])
-
-cov_LSel <- merge(st_drop_geometry(l.used) %>% dplyr::select(NestID, PairID), cov_LSel, all.y = T) %>%
-  mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-  group_by(ID) %>%
-  dplyr::select(-NestID, -PairID)
-
-cov_LSel <- split(cov_LSel[,1:4], cov_LSel$ID)
-
-cov_LSel <- array(as.numeric(unlist(cov_LSel)), dim=c(11, 4, length(cov_LSel)))
 
 
 ##################################################################################
@@ -192,18 +132,6 @@ foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "PairID2")
 Ind_NSel <- unique(as.numeric(as.factor(foridpair$NestID)))
 N_NSel <- length(unique(Ind_NSel))
 
-cov_NSel <- st_drop_geometry(nest.covs[,c(1,which(grepl(covname, colnames(nest.covs))))])
-
-cov_NSel <- merge(st_drop_geometry(nest.used) %>% dplyr::select(NestID, PairID), cov_NSel, all.y = T) %>%
-  mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-  group_by(ID) %>%
-  dplyr::select(-NestID, -PairID)
-
-cov_NSel <- split(cov_NSel[,1:4], cov_NSel$ID)
-
-cov_NSel <- array(as.numeric(unlist(cov_NSel)), dim=c(11, 4, length(cov_NSel)))
-# cov_NSel <- covstoarray(cov_NSel)
-
 
 ##################################################################################
 ### Nest Success
@@ -212,7 +140,6 @@ NDSR_order <- ns_eh_matrix$NestID
 
 nestsuccess.covs <- st_read("./GIS/NestSuccess_Covs.shp") %>%
   arrange(match(NestID, NDSR_order))
-cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, colnames(nestsuccess.covs)))]))
 
 
 ##################################################################################
@@ -220,14 +147,8 @@ cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, co
 NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
 NHQ.covs <- st_transform(NHQ.covs, 32619)
 
-# # #>>>For testing purposes, filter to small portion of study area
-# NHQ.covs <- NHQ.covs %>%
-#   slice(1:500)
-# #<<<For testing purposes, filter to small portion of study area
 
-cov_NHQ <- as.matrix(st_drop_geometry(NHQ.covs[,which(grepl(covname, colnames(NHQ.covs)))]))
-
-
+##################################################################################
 ### Change what you can to integer to preserve some space
 class(y_PL) <- "integer"
 class(y_L) <- "integer"
@@ -247,4 +168,50 @@ class(Ind_NSel) <- "integer"
 class(NInd_NSel) <- "integer"
 class(N_NSel) <- "integer"
 class(ns_ID) <- "integer"
+
+
+##################################################################################
+### Loop through individual covariates to create data files
+for(i in 1:length(covSelnames)){
+  covname <- covSelnames[i]
+  
+  #Pre-Laying Selection
+  cov_PLSel <- st_drop_geometry(pl.covs[,c(1,which(grepl(covname, colnames(pl.covs))))])
+  cov_PLSel <- merge(st_drop_geometry(pl.used) %>% dplyr::select(NestID, PairID), cov_PLSel, all.y = T) %>%
+    mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
+    group_by(ID) %>%
+    dplyr::select(-NestID, -PairID)
+  cov_PLSel <- split(cov_PLSel[,1:4], cov_PLSel$ID)
+  cov_PLSel <- array(as.numeric(unlist(cov_PLSel)), dim=c(11, 4, length(cov_PLSel)))
+  
+  #Laying Selection
+  cov_LSel <- st_drop_geometry(l.covs[,c(1,which(grepl(covname, colnames(l.covs))))])
+  cov_LSel <- merge(st_drop_geometry(l.used) %>% dplyr::select(NestID, PairID), cov_LSel, all.y = T) %>%
+    mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
+    group_by(ID) %>%
+    dplyr::select(-NestID, -PairID)
+  cov_LSel <- split(cov_LSel[,1:4], cov_LSel$ID)
+  cov_LSel <- array(as.numeric(unlist(cov_LSel)), dim=c(11, 4, length(cov_LSel)))
+  
+  #Nest Selection
+  cov_NSel <- st_drop_geometry(nest.covs[,c(1,which(grepl(covname, colnames(nest.covs))))])
+  cov_NSel <- merge(st_drop_geometry(nest.used) %>% dplyr::select(NestID, PairID), cov_NSel, all.y = T) %>%
+    mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
+    group_by(ID) %>%
+    dplyr::select(-NestID, -PairID)
+  cov_NSel <- split(cov_NSel[,1:4], cov_NSel$ID)
+  cov_NSel <- array(as.numeric(unlist(cov_NSel)), dim=c(11, 4, length(cov_NSel)))
+  
+  #Nest Success
+  cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, colnames(nestsuccess.covs)))]))
+  
+  #NHQ
+  cov_NHQ <- as.matrix(st_drop_geometry(NHQ.covs[,which(grepl(covname, colnames(NHQ.covs)))]))
+
+  source(file = "NestHabitatQuality - 2N NIMBLE Prep.R")
+}
+
+
+
+
 
