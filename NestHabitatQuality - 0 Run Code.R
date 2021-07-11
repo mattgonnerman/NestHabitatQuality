@@ -1,6 +1,4 @@
-##CONFIRM BACKUP
-
-### Run JAGS Model
+### Run nimble Model
 #MCMC settings
 ni <- 1000 #number of iterations
 nt <- 1 #thinning

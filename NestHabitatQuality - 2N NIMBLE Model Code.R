@@ -184,22 +184,36 @@ NHQ.code <- nimbleCode({
     NDSR_succ[n,1:3] ~ dmulti(p[n,1:3],1)
   }
   
-  ## Habitat Quality ###
+  # # Habitat Quality ###
   # for(i in 1:nNHQ){
   #   # Selection
   #   PLS[i] <- exp(beta_SC_PLSel*cov_NHQ[i,scale_PLSel])
   #   LS[i] <- exp(beta_SC_LSel*cov_NHQ[i,scale_LSel])
   #   NS[i] <- exp(beta_SC_NSel*cov_NHQ[i,scale_NSel])
-  #   
+  # 
   #   # Failure Risk
   #   PN[i] <- exp(intercept_NDSR + beta_SC_NDSR*cov_NHQ[i,scale_NDSR])
   #   PH[i] <- exp(intercept_HDSR + beta_SC_HDSR*cov_NHQ[i,scale_HDSR])
   #   # PF[i] <- exp(intercept_FDSR + beta_SC_FDSR*cov_NHQ[i,scale_FDSR])
   #   SuccP[i] <- 1/(1 + PH[i] + PN[i]) #+ PF[i])
-  #   
+  # 
   #   #Nesting Habitat Quality Metric
   #   NHQ[i] <- PLS[i]/max(PLS[1:nNHQ]) * LS[i]/max(LS[1:nNHQ]) * NS[i]/max(NS[1:nNHQ]) * SuccP[i]/max(SuccP[1:nNHQ])
   #   }
+  # Habitat Quality ###
+  
+  PLS_max <- max(exp(beta_SC_PLSel*cov_NHQ[1:nNHQ,scale_PLSel]))
+  LS_max <- max(exp(beta_SC_LSel*cov_NHQ[1:nNHQ,scale_LSel]))
+  N_max <- max(exp(beta_SC_NSel*cov_NHQ[1:nNHQ,scale_NSel]))
+  NSucc_max <- max((1/(1 + exp(intercept_NDSR + beta_SC_NDSR*cov_NHQ[1:nNHQ,scale_NDSR]) + exp(intercept_HDSR + beta_SC_HDSR*cov_NHQ[1:nNHQ,scale_HDSR]))))
+  
+  for(i in 1:nNHQ){
+    #Nesting Habitat Quality Metric
+    NHQ[i] <- exp(beta_SC_PLSel*cov_NHQ[i,scale_PLSel])/PLS_max *
+      exp(beta_SC_LSel*cov_NHQ[i,scale_LSel])/LS_max * 
+      exp(beta_SC_NSel*cov_NHQ[i,scale_NSel])/N_max * 
+      (1/(1 + exp(intercept_NDSR + beta_SC_NDSR*cov_NHQ[i,scale_NDSR]) + exp(intercept_HDSR + beta_SC_HDSR*cov_NHQ[i,scale_HDSR])))/NSucc_max
+  }
 })
 
 ### Data for NIMBLE
@@ -256,27 +270,27 @@ NHQ.constants <- list(
 
 NHQ.initial <- list(
   ### PreLaying Selection ###
-  scale_PLSel <- 1,
-  sigma_PLSel <- 1,
-  beta_SC_PLSel <- 0,
+  scale_PLSel = 1,
+  sigma_PLSel = 1,
+  beta_SC_PLSel = 0,
   
   ### Laying Selection ###
-  scale_LSel <- 1,
-  sigma_LSel <- 1,
-  beta_SC_LSel <- 0,
+  scale_LSel = 1,
+  sigma_LSel = 1,
+  beta_SC_LSel = 0,
   
   ### Nesting Selection ###
-  scale_NSel <- 1,
-  sigma_NSel <- 1,
-  beta_SC_NSel <- 0,
+  scale_NSel = 1,
+  sigma_NSel = 1,
+  beta_SC_NSel = 0,
   
   ### Nest Success ###
-  scale_NDSR <- 1,
-  sigma_NDSR <- 1,
-  beta_SC_NDSR <- 0,  
-  scale_HDSR <- 1,
-  sigma_HDSR <- 1,
-  beta_SC_HDSR <- 0
+  scale_NDSR = 1,
+  sigma_NDSR = 1,
+  beta_SC_NDSR = 0,  
+  scale_HDSR = 1,
+  sigma_HDSR = 1,
+  beta_SC_HDSR = 0
 )
 
 
@@ -311,13 +325,19 @@ NHQ.monitor <- c(
   "scale_NDSR",
   "w_NDSR",
   "scale_HDSR",
-  "w_HDSR"
+  "w_HDSR",
   
   ### Nesting Habitat Quality Metric ###
-  # "NHQ"#,"PLS","LS", "NS", "SuccP"
+  "NHQ"#,"PLS","LS", "NS", "SuccP"
 )
 
-save(NHQ.data, NHQ.constants, NHQ.initial, NHQ.monitor, NHQ.code, file = "NHQdata.RData")
+NHQ.dimensions <- list(
+  cov_PLSel = dim(NHQ.data$cov_PLSel),
+  cov_LSel = dim(NHQ.data$cov_LSel),
+  cov_NSel = dim(NHQ.data$cov_NSel)
+)
+
+save(NHQ.data, NHQ.constants, NHQ.initial, NHQ.monitor, NHQ.code, NHQ.dimensions, file = "NHQdata.RData")
 
 ### Clear up workspace to make memory to see if this helps
 rm(list=setdiff(ls(),
@@ -332,23 +352,20 @@ covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
                  "BA_", "HT_", "SW_",
                  "D2Edg_", "D2Rd_", "D2Rp_")
 covname = covSelnames[1]
-### Run Model (Single Core)
-# #Single Line Invocation
-# NHQ.MCMC.final <- nimbleMCMC(code = NHQ.code,
-#                              constants = NHQ.constants,
-#                              data = NHQ.data,
-#                              inits = NHQ.initial,
-#                              niter = ni,
-#                              nchain = nc,
-#                              summary = T,
-#                              WAIC = T,
-#                              monitors = NHQ.monitor)
+#MCMC settings
+ni <- 1000 #number of iterations
+nt <- 1 #thinning
+nb <- 100 #burn in period
+nc <- 1 #number of chains/parallel cores
 
+### Run Model (Single Core)
 #Multiple Line Invocation
 require(nimble)
 NHQ.model <- nimbleModel(code = NHQ.code,
-                         name = paste(covname, "NIMBLE", sep = ""),
-                         constants = NHQ.constants
+                         constants = NHQ.constants,
+                         dimensions = NHQ.dimensions,
+                         inits = NHQ.initial,
+                         data = NHQ.data
                          )
 NHQ.comp.model <- compileNimble(NHQ.model)
 NHQ.conf.mcmc <- configureMCMC(model = NHQ.comp.model,
@@ -358,7 +375,17 @@ NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
 NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
                    niter = ni,
                    nburnin = nb,
-                   nchain = nc)
+                   nchain = nc,
+                   summary = T,
+                   WAIC = T)
+write.csv(NHQ.samples.MCMC$summary)
+
+require(dplyr)
+require(stringr)
+NHQ.df <- as.data.frame(NHQ.samples.MCMC$summary) %>%
+  mutate(Names = row.names(NHQ.samples.MCMC$summary)) %>%
+  filter(grepl("NHQ", Names)) %>%
+  mutate(ID = as.numeric(gsub("\\D", "", Names)))
 
 ### Run Model (Parallel)
 # require(parallel)
