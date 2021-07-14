@@ -92,9 +92,8 @@ N_LSel <- length(unique(Ind_LSel))
 
 ##################################################################################
 ### Nest Site Selection
-# nest.covs <- st_read("./GIS/Nest_Covs_Z.shp")
-# nest.covs <- st_read("./GIS/Nest_Covs.shp") %>%
-#   arrange(NestID, Used)
+nest.covs <- st_read("./GIS/Nest_Covs.shp") %>%
+  arrange(NestID, Used)
 
 nest.used <- nest.covs %>% filter(Used == 1) %>%
   group_by(NestID) %>%
@@ -172,6 +171,9 @@ class(ns_ID) <- "integer"
 
 ##################################################################################
 ### Loop through individual covariates to create data files
+covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
+                 "BA_", "HT_", "SW_",
+                 "D2Edg_", "D2Rd_", "D2Rp_")
 for(i in 1:length(covSelnames)){
   covname <- covSelnames[i]
   
