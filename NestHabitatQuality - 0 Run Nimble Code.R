@@ -1,10 +1,9 @@
-### Spatial Covariate Column Prefixes
-covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
-                 "BA_", "HT_", "SW_",
-                 "D2Edg_", "D2Rd_", "D2Rp_")
-
 ### Data Prep
-source(file = "NestHabitatQuality - 1a JAGS Data Prep - NIMBLE.R")
+#Only need to run once
+# covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
+#                  "BA_", "HT_", "SW_",
+#                  "D2Edg_", "D2Rd_", "D2Rp_")
+# source(file = "NestHabitatQuality - 1a JAGS Data Prep - NIMBLE.R")
 
 ### Initial Model Prep
 #May be necessary to restart R to get completely clear RAM
@@ -63,6 +62,7 @@ for(i in 1:length(covSelnames)){
                               nchain = nc,
                               thin = nt, 
                               summary = T,
+                              samples = T,
                               WAIC = T)
   
   save(NHQ.samples.MCMC, 
