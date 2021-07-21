@@ -7,25 +7,11 @@
 
 ### Initial Model Prep
 #May be necessary to restart R to get completely clear RAM
-require(nimble)
-rm(list=setdiff(ls(),
-                c("NHQ.monitor", "NHQ.code", "NHQ.data", "NHQ.constants", "NHQ.initial",
-                  "covname", "ni", 'nc', "nb")))
-gc()
-  
-load(file = "E:/Maine Drive/Analysis/NestHabitatQuality/ag_NHQdata.RData")
-NHQ.model <- nimbleModel(code = NHQ.code,
-                         constants = NHQ.constants,
-                         dimensions = NHQ.dimensions,
-                         inits = NHQ.initial,
-                         data = NHQ.data)
-save(NHQ.model, file = "E:/Maine Drive/Analysis/NestHabitatQuality/BaseNimbleModel.RData")
-
 ### Run Model
 #MCMC settings
-ni <- 10000 #number of iterations
-nt <- 8 #thinning
-nb <- 2000 #burn in period
+ni <- 30000 #number of iterations
+nt <- 15 #thinning
+nb <- 15000 #burn in period
 nc <- 1 #number of chains/parallel cores
 
 ### Run Model (Single Core)
@@ -34,16 +20,20 @@ require(nimble)
 covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
                    "BA_", "HT_", "SW_",
                    "D2Edg_", "D2Rd_", "D2Rp_")
-for(i in 1:length(covSelnames)){
+for(i in 4){
   rm(list=setdiff(ls(),
-                  c("NHQ.comp.MCMC",
-                    "covname", "ni", 'nc', "nb", "nt", "covSelnames", "i")))
+                  c("covname", "ni", 'nc', "nb", "nt", "covSelnames", "i")))
   gc()
   covname = covSelnames[i]
   
   
   load(file = paste("E:/Maine Drive/Analysis/NestHabitatQuality/", covname, "NHQdata.RData", sep = ""))
-  load(file = "E:/Maine Drive/Analysis/NestHabitatQuality/BaseNimbleModel.RData")
+  NHQ.model <- nimbleModel(code = NHQ.code,
+                           name = paste(covname, "Model", sep = ""),
+                           constants = NHQ.constants,
+                           dimensions = NHQ.dimensions,
+                           inits = NHQ.initial,
+                           data = NHQ.data)
   NHQ.model$setData(NHQ.data)
   NHQ.monitor <- c(NHQ.monitor, "err_PL", "err_L", "err_N")
   NHQ.comp.model <- compileNimble(NHQ.model)
@@ -62,7 +52,6 @@ for(i in 1:length(covSelnames)){
                               nchain = nc,
                               thin = nt, 
                               summary = T,
-                              samples = T,
                               WAIC = T)
   
   save(NHQ.samples.MCMC, 
