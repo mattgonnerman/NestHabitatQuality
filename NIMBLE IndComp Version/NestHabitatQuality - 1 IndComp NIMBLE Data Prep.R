@@ -171,7 +171,7 @@ class(ns_ID) <- "integer"
 
 ##################################################################################
 ### Loop through individual covariates to create data files
-for(i in 1:length(covSelnames)){
+for(i in 4:8){
   covname <- covSelnames[i]
   
   #Pre-Laying Selection
@@ -207,10 +207,10 @@ for(i in 1:length(covSelnames)){
   #NHQ
   # cov_NHQ <- as.matrix(st_drop_geometry(NHQ.covs[,which(grepl(covname, colnames(NHQ.covs)))]))
 
-  source(file = "NestHabitatQuality - 2 IndComp NIMBLE Prep - NSel.R")
-  source(file = "NestHabitatQuality - 2 IndComp NIMBLE Prep - LSel.R")
-  source(file = "NestHabitatQuality - 2 IndComp NIMBLE Prep - PLSel.R")
-  source(file = "NestHabitatQuality - 2 IndComp NIMBLE Prep - NDSR.R")
+  source(file = "./NIMBLE IndComp Version/NestHabitatQuality - 2 IndComp NIMBLE Prep - NSel.R")
+  source(file = "./NIMBLE IndComp Version/NestHabitatQuality - 2 IndComp NIMBLE Prep - LSel.R")
+  source(file = "./NIMBLE IndComp Version/NestHabitatQuality - 2 IndComp NIMBLE Prep - PLSel.R")
+  source(file = "./NIMBLE IndComp Version/NestHabitatQuality - 2 IndComp NIMBLE Prep - NDSR.R")
   # source(file = "NestHabitatQuality - 2N NIMBLE Prep.R")
 }
 
