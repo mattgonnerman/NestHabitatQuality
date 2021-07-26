@@ -1,6 +1,8 @@
 ####################
 ### NEST SUCCESS ###
 ####################
+### Multinomila Logistic Nest Fate From...
+## Darrah et al 2018
 
 ### Nimble Attempt
 require(nimble)
@@ -76,8 +78,6 @@ NHQ.initial <- list(
   scale_HDSR = 1,
   beta_SC_HDSR = 0
 )
-
-
 
 ### Parameters monitors
 NHQ.monitor <- c(

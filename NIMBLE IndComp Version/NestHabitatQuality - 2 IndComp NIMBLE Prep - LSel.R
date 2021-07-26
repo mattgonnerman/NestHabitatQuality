@@ -1,6 +1,14 @@
 ########################
 ### LAYING SELECTION ###
 ########################
+### Justification for using a conditional logistic regression for RSF
+## Duchesne et al 2010 - Mixed conditional logsitic regression for habitat selection studies
+### Infinitely Weighted Logistic Regression 
+## Fithian and Hastie 2013
+### Weighted Conditional Logistic Regression Code...
+## Lee et al. 2019
+### Conditional Logistic Regression Code From...
+## Espino-Hernandez et al. 2011
 
 ### Nimble Attempt
 require(nimble)
@@ -20,15 +28,11 @@ NHQ.code <- nimbleCode({
   scale_LSel ~ dcat(weights[1:4])
   
   # Individual Random Effect (Slope)
-  alpha_L_Slp[1:NNest_LSel] ~ dmnorm(mu_L_S[1:NNest_LSel], omega_L_S[1:NNest_LSel,1:NNest_LSel])
+  alpha_L_Slp[1:NNest_LSel] ~ dmnorm(mu_L[1:NNest_LSel], omega_L_S[1:NNest_LSel,1:NNest_LSel])
+  mu_L[1:NNest_LSel] <- rep(0, NNest_LSel)
   omega_L_S[1:NNest_LSel,1:NNest_LSel] ~ dwish(R_L_S[1:NNest_LSel,1:NNest_LSel],NNest_LSel)
-  for(i in 1:NNest_LSel){
-    mu_L_S[i] <- 0
-    for(j in 1:NNest_LSel){
-      R_L_S[i,j] <- ifelse(i==j, 1, 0.1)
-    }
-  }
-  
+  R_L_S[1:NNest_LSel,1:NNest_LSel] <- diag(rep(0.1, NNest_LSel))
+   
   ## Likelihood
   for(i in 1:NGrp_LSel){
     y_L[i, 1:11] ~ dmulti(p_L[i,1:11], 1)

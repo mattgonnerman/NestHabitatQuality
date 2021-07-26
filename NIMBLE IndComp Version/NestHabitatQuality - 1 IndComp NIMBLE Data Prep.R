@@ -3,133 +3,166 @@ lapply(c('dplyr', 'sf', 'move', 'raster', 'snowfall', 'lubridate', 'ggplot2', 'f
 
 memory.limit(56000)
 
-#Weight for logistic regression
+#Weight for RSF infinitely weighted logistic regression
 w <- 10000
+
+########################
+### DATA PREPARATION ###
+########################
 
 ##################################################################################
 ### Prelaying Selection
+#Load selection points
 pl.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
-  arrange(NestID, Used)
+  arrange(NestID, Used) %>%
+  mutate(MergeID = row_number())
 
+#Create Object of Used Locations
 pl.used <- pl.covs %>% filter(Used == 1) %>%
   group_by(NestID) %>%
-  mutate(PairID = row_number())
+  mutate(PairID = row_number()) %>%
+  mutate(MatchID = paste(NestID, PairID, sep = "_"))
+
+#Filter down available locations to just 10 per used point
 pl.avail <- pl.covs %>% filter(Used == 0) %>%
   group_by(NestID) %>%
   mutate(PairID = ceiling(row_number()/10)) %>%  #10 for PL and L, 100 for N
-  ungroup() %>%
-  mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-  group_by(ID) %>%
-  slice(1:10) %>%
-  dplyr::select(-ID)
+  mutate(MatchID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
+  filter(MatchID %in% pl.used$MatchID) %>%
+  ungroup()
 
+#Bind used and available data frames
 pl.df <- st_drop_geometry(rbind(pl.used, pl.avail)) %>%
-  mutate(PairID2 = paste(NestID, PairID, sep = "_")) %>%
-  arrange(PairID2, desc(Used)) %>%
-  group_by(PairID2) %>%
+  arrange(NestID, PairID, desc(Used)) %>%
+  group_by(MatchID) %>%
   filter(!all(Used != 1)) %>%
   filter(!all(Used != 0)) %>%
   ungroup()
 
-y_PL <- as.matrix(pl.df %>% dplyr::select(PairID2, Used) %>%
-                  group_by(PairID2) %>% mutate(Number = row_number()) %>%
-                  dcast(PairID2 ~ Number, value.var = "Used") %>%
-                  dplyr::select(-PairID2))
+# Matrix designating Used (1) or Available (0)
+y_PL <- as.matrix(pl.df %>% dplyr::select(MatchID, Used) %>%
+                  group_by(MatchID) %>% mutate(Number = row_number()) %>%
+                  dcast(MatchID ~ Number, value.var = "Used") %>%
+                  dplyr::select(-MatchID))
+
+#Weights for Infinitely Weighted logistic regression
 weightsPL <- ifelse(y_PL == "0", w, ifelse(y_PL == 1, 1, NA))
-nPLLocs <- rowSums(!is.na(y_PL))
+
+#Indicates number of Locations per used point; commented as all should have 10:1
+# nPLLocs <- rowSums(!is.na(y_PL))
+
+#Number of Used:Available groups
 NInd_PLSel <- nrow(y_PL)
 
-foridpair1 <- pl.df %>% dplyr::select(PairID2, Used) %>%
-                    group_by(PairID2) %>% mutate(Number = row_number()) %>%
-                    dcast(PairID2 ~ Number, value.var = "Used")
-foridpair2 <- pl.df %>% dplyr::select(NestID, PairID2) %>% distinct()
-foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "PairID2")
+#Create Nest ID indexing vector
+foridpair1 <- pl.df %>% dplyr::select(MatchID, Used) %>%
+                    group_by(MatchID) %>% mutate(Number = row_number()) %>%
+                    dcast(MatchID ~ Number, value.var = "Used")
+foridpair2 <- pl.df %>% dplyr::select(NestID, PairID, MatchID) %>% distinct()
+foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "MatchID") %>%
+  arrange(NestID, PairID)
 Ind_PLSel <- as.numeric(as.factor(foridpair$NestID))
+
+#Total Number of Nests in Analysis
 N_PLSel <- length(unique(Ind_PLSel))
 
 
 ##################################################################################
 ### Laying Selection
-#Read the laying covariate point shapefile
+#Load selection points
 l.covs <- st_read("./GIS/Laying_Covs.shp") %>%
-  arrange(NestID, Used)
+  arrange(NestID, Used)  %>%
+  mutate(MergeID = row_number())
 
+#Create Object of Used Locations
 l.used <- l.covs %>% filter(Used == 1) %>%
   group_by(NestID) %>%
-  mutate(PairID = row_number())
+  mutate(PairID = row_number()) %>%
+  mutate(MatchID = paste(NestID, PairID, sep = "_"))
+
+#Filter down available locations to just 10 per used point
 l.avail <- l.covs %>% filter(Used == 0) %>%
   group_by(NestID) %>%
   mutate(PairID = ceiling(row_number()/10)) %>%  #10 for PL and L, 100 for N
-  ungroup() %>%
-  mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-  group_by(ID) %>%
-  slice(1:10) %>%
-  dplyr::select(-ID)
+  mutate(MatchID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
+  filter(MatchID %in% l.used$MatchID) %>%
+  ungroup()
 
+#Bind used and available data frames
 l.df <- st_drop_geometry(rbind(l.used, l.avail)) %>%
-  mutate(PairID2 = paste(NestID, PairID, sep = "_")) %>%
-  arrange(PairID2, desc(Used)) %>%
-  group_by(PairID2) %>%
+  arrange(NestID, PairID, desc(Used)) %>%
+  group_by(MatchID) %>%
   filter(!all(Used != 1)) %>%
   filter(!all(Used != 0)) %>%
   ungroup()
 
-y_L <- as.matrix(l.df %>% dplyr::select(PairID2, Used) %>%
-                    group_by(PairID2) %>% mutate(Number = row_number()) %>%
-                    dcast(PairID2 ~ Number, value.var = "Used") %>%
-                    dplyr::select(-PairID2))
+# Matrix designating Used (1) or Available (0)
+y_L <- as.matrix(l.df %>% dplyr::select(MatchID, Used) %>%
+                    group_by(MatchID) %>% mutate(Number = row_number()) %>%
+                    dcast(MatchID ~ Number, value.var = "Used") %>%
+                    dplyr::select(-MatchID))
+
+#Weights for Infinitely Weighted logistic regression
 weightsL <- ifelse(y_L == "0", w, ifelse(y_L == 1, 1, NA))
-nLLocs <- rowSums(!is.na(y_L))
+
+#Indicates number of Locations per used point; commented as all should have 10:1
+# nPLLocs <- rowSums(!is.na(y_PL))
+
+#Number of Used:Available groups
 NInd_LSel <- nrow(y_L)
-foridpair1 <- l.df %>% dplyr::select(PairID2, Used) %>%
-  group_by(PairID2) %>% mutate(Number = row_number()) %>%
-  dcast(PairID2 ~ Number, value.var = "Used")
-foridpair2 <- l.df %>% dplyr::select(NestID, PairID2) %>% distinct()
-foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "PairID2")
+
+#Create Nest ID indexing vector
+foridpair1 <- l.df %>% dplyr::select(MatchID, Used) %>%
+  group_by(MatchID) %>% mutate(Number = row_number()) %>%
+  dcast(MatchID ~ Number, value.var = "Used")
+foridpair2 <- l.df %>% dplyr::select(NestID, PairID, MatchID) %>% distinct()
+foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "MatchID") %>%
+  arrange(NestID, PairID)
 Ind_LSel <- as.numeric(as.factor(foridpair$NestID))
+
+#Total Number of Nests in Analysis
 N_LSel <- length(unique(Ind_LSel))
 
 
 ##################################################################################
 ### Nest Site Selection
+#Load selection points
 nest.covs <- st_read("./GIS/Nest_Covs.shp") %>%
-  arrange(NestID, Used)
+  arrange(NestID, Used) %>%
+  mutate(Used = as.numeric(Used)) %>%
+  filter(NestID != "1561-2020-1", NestID != "1563-2020-1") %>% #No Data Sheets, GPS with clear nest though 
+  mutate(MergeID = row_number())
 
+#Create Object of Used Locations
 nest.used <- nest.covs %>% filter(Used == 1) %>%
-  group_by(NestID) %>%
-  mutate(PairID = row_number())
+  mutate(PairID = 1)
+
+#Filter down available locations to just 10 per used point
 nest.avail <- nest.covs %>% filter(Used == 0) %>%
   group_by(NestID) %>%
-  mutate(PairID = ceiling(row_number()/10)) %>%  #10 for PL and L, 100 for N
-  ungroup() %>%
-  mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-  group_by(ID) %>%
-  slice(1:10) %>%
-  dplyr::select(-ID)
+  mutate(PairID = row_number()) %>%
+  filter(PairID < 11) %>%
+  ungroup()
 
+#Bind used and available data frames
 nest.df <- st_drop_geometry(rbind(nest.used, nest.avail)) %>%
-  mutate(PairID2 = paste(NestID, PairID, sep = "_")) %>%
-  arrange(PairID2, desc(Used)) %>%
-  group_by(PairID2) %>%
+  arrange(NestID, PairID, desc(Used)) %>%
+  group_by(NestID) %>%
   filter(!all(Used != 1)) %>%
   filter(!all(Used != 0)) %>%
   ungroup()
 
-y_N <- as.matrix(nest.df %>% dplyr::select(PairID2, Used) %>%
-                   group_by(PairID2) %>% mutate(Number = row_number()) %>%
-                   dcast(PairID2 ~ Number, value.var = "Used") %>%
-                   dplyr::select(-PairID2))
-class(y_N) <- "numeric"
+# Matrix designating Used (1) or Available (0)
+y_N <- as.matrix(nest.df %>% dplyr::select(NestID, PairID, Used) %>%
+                   group_by(NestID) %>% arrange(PairID) %>% mutate(Number = row_number()) %>%
+                   dcast(NestID ~ Number, value.var = "Used") %>%
+                   dplyr::select(-NestID))
+
+#Weights for Infinitely Weighted logistic regression
 weightsN <- ifelse(y_N == "0", w, ifelse(y_N == 1, 1, NA))
-nNLocs <- rowSums(!is.na(y_N))
+
+#Number of Used:Available groups
 NInd_NSel <- nrow(y_N)
-foridpair1 <- nest.df %>% dplyr::select(PairID2, Used) %>%
-  group_by(PairID2) %>% mutate(Number = row_number()) %>%
-  dcast(PairID2 ~ Number, value.var = "Used")
-foridpair2 <- nest.df %>% dplyr::select(NestID, PairID2) %>% distinct()
-foridpair <- merge(foridpair1, foridpair2, all.x = T, all.y = F, by = "PairID2")
-Ind_NSel <- unique(as.numeric(as.factor(foridpair$NestID)))
-N_NSel <- length(unique(Ind_NSel))
 
 
 ##################################################################################
@@ -165,41 +198,46 @@ class(NInd_LSel) <- "integer"
 class(N_LSel) <- "integer"
 class(Ind_NSel) <- "integer"
 class(NInd_NSel) <- "integer"
-class(N_NSel) <- "integer"
 class(ns_ID) <- "integer"
 
 
 ##################################################################################
 ### Loop through individual covariates to create data files
-for(i in 4:8){
+covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
+                 "BA_", "HT_", "SW_",
+                 "D2Edg_", "D2Rd_", "D2Rp_")
+
+for(i in 1:10){
   covname <- covSelnames[i]
   
   #Pre-Laying Selection
-  cov_PLSel <- st_drop_geometry(pl.covs[,c(1,which(grepl(covname, colnames(pl.covs))))])
-  cov_PLSel <- merge(st_drop_geometry(pl.used) %>% dplyr::select(NestID, PairID), cov_PLSel, all.y = T) %>%
+  cov_PLSel1 <- st_drop_geometry(pl.covs[,c(1,which(grepl(covname, colnames(pl.covs))), ncol(pl.covs))])
+  cov_PLSel2 <- merge(pl.df %>% dplyr::select(NestID, PairID, MergeID, Used), cov_PLSel1, by = c("NestID", "MergeID")) %>%
+    arrange(NestID, PairID, desc(Used), MergeID) %>%
     mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
     group_by(ID) %>%
-    dplyr::select(-NestID, -PairID)
-  cov_PLSel <- split(cov_PLSel[,1:4], cov_PLSel$ID)
-  cov_PLSel <- array(as.numeric(unlist(cov_PLSel)), dim=c(11, 4, length(cov_PLSel)))
+    dplyr::select(-NestID, -PairID, -Used, -MergeID)
+  cov_PLSel3 <- split(cov_PLSel2[,1:4], cov_PLSel2$ID)
+  cov_PLSel <- array(as.numeric(unlist(cov_PLSel3)), dim=c(11, 4, length(cov_PLSel3)))
   
   #Laying Selection
-  cov_LSel <- st_drop_geometry(l.covs[,c(1,which(grepl(covname, colnames(l.covs))))])
-  cov_LSel <- merge(st_drop_geometry(l.used) %>% dplyr::select(NestID, PairID), cov_LSel, all.y = T) %>%
+  cov_LSel1 <- st_drop_geometry(l.covs[,c(1,which(grepl(covname, colnames(l.covs))), ncol(l.covs))])
+  cov_LSel2 <- merge(l.df %>% dplyr::select(NestID, PairID, MergeID, Used), cov_LSel1, by = c("NestID", "MergeID")) %>%
+    arrange(NestID, PairID, desc(Used), MergeID) %>%
     mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
     group_by(ID) %>%
-    dplyr::select(-NestID, -PairID)
-  cov_LSel <- split(cov_LSel[,1:4], cov_LSel$ID)
-  cov_LSel <- array(as.numeric(unlist(cov_LSel)), dim=c(11, 4, length(cov_LSel)))
+    dplyr::select(-NestID, -PairID, -Used, -MergeID)
+  cov_LSel3 <- split(cov_LSel2[,1:4], cov_LSel2$ID)
+  cov_LSel <- array(as.numeric(unlist(cov_LSel3)), dim=c(11, 4, length(cov_LSel3)))
   
   #Nest Selection
-  cov_NSel <- st_drop_geometry(nest.covs[,c(1,which(grepl(covname, colnames(nest.covs))))])
-  cov_NSel <- merge(st_drop_geometry(nest.used) %>% dplyr::select(NestID, PairID), cov_NSel, all.y = T) %>%
-    mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
-    group_by(ID) %>%
-    dplyr::select(-NestID, -PairID)
-  cov_NSel <- split(cov_NSel[,1:4], cov_NSel$ID)
-  cov_NSel <- array(as.numeric(unlist(cov_NSel)), dim=c(11, 4, length(cov_NSel)))
+  cov_NSel1 <- st_drop_geometry(nest.covs[,c(1,which(grepl(covname, colnames(nest.covs))), ncol(nest.covs))])
+  cov_NSel2 <- merge(nest.df %>% dplyr::select(NestID, PairID, MergeID, Used), cov_NSel1, by = c("NestID", "MergeID")) %>%
+    arrange(NestID, PairID, desc(Used), MergeID) %>%
+    group_by(NestID) %>%
+    dplyr::select(-PairID, -Used, -MergeID)
+  cov_NSel3 <- split(cov_NSel2[,2:5], cov_NSel2$NestID)
+  cov_NSel <- array(as.numeric(unlist(cov_NSel3)), dim=c(11, 4, length(cov_NSel3)))
   
   #Nest Success
   cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, colnames(nestsuccess.covs)))]))
@@ -213,8 +251,3 @@ for(i in 4:8){
   source(file = "./NIMBLE IndComp Version/NestHabitatQuality - 2 IndComp NIMBLE Prep - NDSR.R")
   # source(file = "NestHabitatQuality - 2N NIMBLE Prep.R")
 }
-
-
-
-
-

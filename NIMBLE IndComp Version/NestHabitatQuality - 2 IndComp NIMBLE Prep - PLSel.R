@@ -1,6 +1,15 @@
 ###########################
 ### PRELAYING SELECTION ###
 ###########################
+### Justification for using a conditional logistic regression for RSF
+## Duchesne et al 2010 - Mixed conditional logsitic regression for habitat selection studies
+### Infinitely Weighted Logistic Regression 
+## Fithian and Hastie 2013
+### Weighted Conditional Logistic Regression Code...
+## Lee et al. 2019
+### Conditional Logistic Regression Code From...
+## Espino-Hernandez et al. 2011
+
 
 ### Nimble Attempt
 require(nimble)
@@ -9,8 +18,7 @@ require(nimble)
 NHQ.code <- nimbleCode({
   
   #############################################################################
-  ### Prelaying Habitat Selection
-  ## Priors
+  
   # Habitat Coefficient
   beta_SC_PLSel ~ dnorm(0, 0.001)
   
@@ -19,14 +27,10 @@ NHQ.code <- nimbleCode({
   scale_PLSel ~ dcat(weights[1:4])
   
   # Individual Random Effect (Slope)
-  alpha_PL_Slp[1:NNest_PLSel] ~ dmnorm(mu_PL_S[1:NNest_PLSel], omega_PL_S[1:NNest_PLSel,1:NNest_PLSel])
-  omega_PL_S[1:NNest_PLSel,1:NNest_PLSel] ~ dwish(R_PL_S[1:NNest_PLSel,1:NNest_PLSel],NNest_PLSel)
-  for(i in 1:NNest_PLSel){
-    mu_PL_S[i] <- 0
-    for(j in 1:NNest_PLSel){
-      R_PL_S[i,j] <- ifelse(i==j, 1, 0.1)
-    }
-  }
+  alpha_PL_Slp[1:NNest_PLSel] ~ dmnorm(mu_PL[1:NNest_PLSel], omega_PL_S[1:NNest_PLSel,1:NNest_PLSel])
+  mu_PL[1:NNest_PLSel] <- rep(0, NNest_PLSel)
+  omega_PL_S[1:NNest_PLSel,1:NNest_PLSel] ~ dwish(R_PL_S[1:NNest_PLSel,1:NNest_PLSel], NNest_PLSel)
+  R_PL_S[1:NNest_PLSel,1:NNest_PLSel] <- diag(rep(0.1, NNest_PLSel))
 
   ## Likelihood
   for(i in 1:NGrp_PLSel){

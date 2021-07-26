@@ -1,6 +1,14 @@
 ###########################
 ### NEST SITE SELECTION ###
 ###########################
+### Justification for using a conditional logistic regression for RSF
+## Duchesne et al 2010 - Mixed conditional logsitic regression for habitat selection studies
+### Infinitely Weighted Logistic Regression 
+## Fithian and Hastie 2013
+### Weighted Conditional Logistic Regression Code...
+## Lee et al. 2019
+### Conditional Logistic Regression Code From...
+## Espino-Hernandez et al. 2011
 
 ### Make sure r-NIMBLE is loaded
 require(nimble)
@@ -43,7 +51,6 @@ NHQ.data <- list(
 ### Constants for NIMBLE
 NHQ.constants <- list(
   ### Nesting Selection ###
-  # NestID_N = Ind_NSel, # Numeric Nest ID
   NNest_NSel = NInd_NSel # Number of Nests
 )
 
