@@ -28,10 +28,13 @@ NHQ.code <- nimbleCode({
   scale_LSel ~ dcat(weights[1:4])
   
   # Individual Random Effect (Slope)
-  alpha_L_Slp[1:NNest_LSel] ~ dmnorm(mu_L[1:NNest_LSel], omega_L_S[1:NNest_LSel,1:NNest_LSel])
-  mu_L[1:NNest_LSel] <- rep(0, NNest_LSel)
-  omega_L_S[1:NNest_LSel,1:NNest_LSel] ~ dwish(R_L_S[1:NNest_LSel,1:NNest_LSel],NNest_LSel)
-  R_L_S[1:NNest_LSel,1:NNest_LSel] <- diag(rep(0.1, NNest_LSel))
+  for(i in 1:NNest_PLSel){
+    alpha_L_Slp[i] ~ dunif(-10,10)
+  }
+  # alpha_L_Slp[1:NNest_LSel] ~ dmnorm(mu_L[1:NNest_LSel], omega_L_S[1:NNest_LSel,1:NNest_LSel])
+  # mu_L[1:NNest_LSel] <- rep(0, NNest_LSel)
+  # omega_L_S[1:NNest_LSel,1:NNest_LSel] ~ dwish(R_L_S[1:NNest_LSel,1:NNest_LSel],NNest_LSel)
+  # R_L_S[1:NNest_LSel,1:NNest_LSel] <- diag(rep(1, NNest_LSel))
    
   ## Likelihood
   for(i in 1:NGrp_LSel){
@@ -66,7 +69,9 @@ NHQ.constants <- list(
 NHQ.initial <- list(
   ### Laying Selection ###
   scale_LSel = 1,
-  beta_SC_LSel = 0
+  beta_SC_LSel = 0,
+  alpha_L_Slp = rep(0, N_LSel),
+  omega_L_S = diag(rep(1, N_LSel))
 )
 
 
@@ -75,7 +80,8 @@ NHQ.initial <- list(
 NHQ.monitor <- c(
   ### Laying Selection ###
   "beta_SC_LSel",
-  "scale_LSel"
+  "scale_LSel",
+  "alpha_L_Slp"
 )
 
 NHQ.dimensions <- list(

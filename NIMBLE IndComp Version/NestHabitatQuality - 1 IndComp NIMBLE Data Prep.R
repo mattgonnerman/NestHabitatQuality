@@ -9,13 +9,18 @@ w <- 10000
 ########################
 ### DATA PREPARATION ###
 ########################
-
+#Vectors for cycling through each model component and covariates
+compnames <- c("PLSel", "LSel", "NSel", "NDSR")
+covSelnames <- c("ag_", "dev_", "shrub_", "hrb_",
+                 "BA_", "HT_", "SW_",
+                 "D2Edg_", "D2Rd_", "D2Rp_")
 ##################################################################################
 ### Prelaying Selection
 #Load selection points
 pl.covs <- st_read("./GIS/Prelaying_Covs.shp") %>%
   arrange(NestID, Used) %>%
   mutate(MergeID = row_number())
+colnames(pl.covs)[12:15] <- paste("shrub_f", 1:4, sep = "")
 
 #Create Object of Used Locations
 pl.used <- pl.covs %>% filter(Used == 1) %>%
@@ -73,6 +78,7 @@ N_PLSel <- length(unique(Ind_PLSel))
 l.covs <- st_read("./GIS/Laying_Covs.shp") %>%
   arrange(NestID, Used)  %>%
   mutate(MergeID = row_number())
+colnames(l.covs)[12:15] <- paste("shrub_f", 1:4, sep = "")
 
 #Create Object of Used Locations
 l.used <- l.covs %>% filter(Used == 1) %>%
@@ -132,6 +138,7 @@ nest.covs <- st_read("./GIS/Nest_Covs.shp") %>%
   mutate(Used = as.numeric(Used)) %>%
   filter(NestID != "1561-2020-1", NestID != "1563-2020-1") %>% #No Data Sheets, GPS with clear nest though 
   mutate(MergeID = row_number())
+colnames(nest.covs)[12:15] <- paste("shrub_f", 1:4, sep = "")
 
 #Create Object of Used Locations
 nest.used <- nest.covs %>% filter(Used == 1) %>%
@@ -172,7 +179,7 @@ NDSR_order <- ns_eh_matrix$NestID
 
 nestsuccess.covs <- st_read("./GIS/NestSuccess_Covs.shp") %>%
   arrange(match(NestID, NDSR_order))
-
+colnames(nestsuccess.covs)[10:13] <- paste("shrub_f", 1:4, sep = "")
 
 ##################################################################################
 ### Full Raster Values for Final NHQ metric
@@ -196,14 +203,13 @@ class(N_PLSel) <- "integer"
 class(Ind_LSel) <- "integer"
 class(NInd_LSel) <- "integer"
 class(N_LSel) <- "integer"
-class(Ind_NSel) <- "integer"
 class(NInd_NSel) <- "integer"
 class(ns_ID) <- "integer"
 
 
 ##################################################################################
 ### Loop through individual covariates to create data files
-covSelnames <- c("ag_", "dev_", "shrb_", "hrb_",
+covSelnames <- c("ag_", "dev_", "shrub_", "hrb_",
                  "BA_", "HT_", "SW_",
                  "D2Edg_", "D2Rd_", "D2Rp_")
 
@@ -217,6 +223,13 @@ for(i in 1:10){
     mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
     group_by(ID) %>%
     dplyr::select(-NestID, -PairID, -Used, -MergeID)
+  
+  #Z - Scale
+  cov_PLSel2[,1] <- scale(cov_PLSel2[,1], center = TRUE, scale = TRUE)
+  cov_PLSel2[,2] <- scale(cov_PLSel2[,2], center = TRUE, scale = TRUE)
+  cov_PLSel2[,3] <- scale(cov_PLSel2[,3], center = TRUE, scale = TRUE)
+  cov_PLSel2[,4] <- scale(cov_PLSel2[,4], center = TRUE, scale = TRUE)
+  
   cov_PLSel3 <- split(cov_PLSel2[,1:4], cov_PLSel2$ID)
   cov_PLSel <- array(as.numeric(unlist(cov_PLSel3)), dim=c(11, 4, length(cov_PLSel3)))
   
@@ -227,6 +240,13 @@ for(i in 1:10){
     mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
     group_by(ID) %>%
     dplyr::select(-NestID, -PairID, -Used, -MergeID)
+  
+  #Z - Scale
+  cov_LSel2[,1] <- scale(cov_LSel2[,1], center = TRUE, scale = TRUE)
+  cov_LSel2[,2] <- scale(cov_LSel2[,2], center = TRUE, scale = TRUE)
+  cov_LSel2[,3] <- scale(cov_LSel2[,3], center = TRUE, scale = TRUE)
+  cov_LSel2[,4] <- scale(cov_LSel2[,4], center = TRUE, scale = TRUE)
+  
   cov_LSel3 <- split(cov_LSel2[,1:4], cov_LSel2$ID)
   cov_LSel <- array(as.numeric(unlist(cov_LSel3)), dim=c(11, 4, length(cov_LSel3)))
   
@@ -236,11 +256,24 @@ for(i in 1:10){
     arrange(NestID, PairID, desc(Used), MergeID) %>%
     group_by(NestID) %>%
     dplyr::select(-PairID, -Used, -MergeID)
+  
+  #Z - Scale
+  cov_NSel2[,5] <- scale(cov_NSel2[,5], center = TRUE, scale = TRUE)
+  cov_NSel2[,2] <- scale(cov_NSel2[,2], center = TRUE, scale = TRUE)
+  cov_NSel2[,3] <- scale(cov_NSel2[,3], center = TRUE, scale = TRUE)
+  cov_NSel2[,4] <- scale(cov_NSel2[,4], center = TRUE, scale = TRUE)
+  
   cov_NSel3 <- split(cov_NSel2[,2:5], cov_NSel2$NestID)
   cov_NSel <- array(as.numeric(unlist(cov_NSel3)), dim=c(11, 4, length(cov_NSel3)))
   
   #Nest Success
   cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs[,which(grepl(covname, colnames(nestsuccess.covs)))]))
+  
+  #Z - Scale
+  cov_NDSR[,1] <- scale(cov_NDSR[,1], center = TRUE, scale = TRUE)
+  cov_NDSR[,2] <- scale(cov_NDSR[,2], center = TRUE, scale = TRUE)
+  cov_NDSR[,3] <- scale(cov_NDSR[,3], center = TRUE, scale = TRUE)
+  cov_NDSR[,4] <- scale(cov_NDSR[,4], center = TRUE, scale = TRUE)
   
   #NHQ
   # cov_NHQ <- as.matrix(st_drop_geometry(NHQ.covs[,which(grepl(covname, colnames(NHQ.covs)))]))

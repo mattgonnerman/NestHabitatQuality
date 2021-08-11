@@ -27,10 +27,13 @@ NHQ.code <- nimbleCode({
   scale_PLSel ~ dcat(weights[1:4])
   
   # Individual Random Effect (Slope)
-  alpha_PL_Slp[1:NNest_PLSel] ~ dmnorm(mu_PL[1:NNest_PLSel], omega_PL_S[1:NNest_PLSel,1:NNest_PLSel])
-  mu_PL[1:NNest_PLSel] <- rep(0, NNest_PLSel)
-  omega_PL_S[1:NNest_PLSel,1:NNest_PLSel] ~ dwish(R_PL_S[1:NNest_PLSel,1:NNest_PLSel], NNest_PLSel)
-  R_PL_S[1:NNest_PLSel,1:NNest_PLSel] <- diag(rep(0.1, NNest_PLSel))
+  for(i in 1:NNest_PLSel){
+    alpha_PL_Slp[i] ~ dunif(-10,10)
+  }
+  # alpha_PL_Slp[1:NNest_PLSel] ~ dmnorm(mu_PL[1:NNest_PLSel], omega_PL_S[1:NNest_PLSel,1:NNest_PLSel])
+  # mu_PL[1:NNest_PLSel] <- rep(0, NNest_PLSel)
+  # omega_PL_S[1:NNest_PLSel,1:NNest_PLSel] ~ dwish(R_PL_S[1:NNest_PLSel,1:NNest_PLSel], NNest_PLSel)
+  # R_PL_S[1:NNest_PLSel,1:NNest_PLSel] <- diag(rep(0.1, NNest_PLSel))
 
   ## Likelihood
   for(i in 1:NGrp_PLSel){
@@ -65,7 +68,9 @@ NHQ.constants <- list(
 NHQ.initial <- list(
   ### PreLaying Selection ###
   scale_PLSel = 1,
-  beta_SC_PLSel = 0
+  beta_SC_PLSel = 0,
+  alpha_PL_Slp = rep(0, N_PLSel),
+  omega_PL_S = diag(rep(1, N_PLSel))
 )
 
 
@@ -74,7 +79,9 @@ NHQ.initial <- list(
 NHQ.monitor <- c(
   ### PreLaying Selection ###
   "beta_SC_PLSel",
-  "scale_PLSel"
+  "scale_PLSel",
+  "alpha_PL_Slp"
+  
 )
 
 NHQ.dimensions <- list(

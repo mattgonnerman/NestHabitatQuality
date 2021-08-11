@@ -155,7 +155,14 @@ for(i in 1:nrow(ns_eh_failnomort)){
   } #j
 } #i
 
-
+#If a nest successfully hatched, change the 0 to NA
+# fates <- nestfate.raw %>% dplyr::select(NestID, Fate)
+# 
+# for(i in 1:nrow(ns_eh_matrix)){
+#   if(fates$Fate[fates$NestID == ns_eh_matrix$NestID[i]] == 0){
+#     ns_eh_matrix[i, which(ns_eh_matrix[i,] == 0)] <- NA
+#   }
+# }
 
 ########################
 ### Prep EH For JAGS ###

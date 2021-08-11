@@ -76,7 +76,9 @@ NHQ.initial <- list(
   scale_NDSR = 1,
   beta_SC_NDSR = 0,  
   scale_HDSR = 1,
-  beta_SC_HDSR = 0
+  beta_SC_HDSR = 0,
+  intercept_HDSR = 0,
+  intercept_NDSR = 0
 )
 
 ### Parameters monitors
