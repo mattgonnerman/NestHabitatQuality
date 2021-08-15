@@ -28,9 +28,9 @@ NHQ.code <- nimbleCode({
   scale_LSel ~ dcat(weights[1:4])
   
   # Individual Random Effect (Slope)
-  for(i in 1:NNest_PLSel){
-    alpha_L_Slp[i] ~ dunif(-10,10)
-  }
+  # for(i in 1:NNest_PLSel){
+  #   alpha_L_Slp[i] ~ dunif(-10,10)
+  # }
   # alpha_L_Slp[1:NNest_LSel] ~ dmnorm(mu_L[1:NNest_LSel], omega_L_S[1:NNest_LSel,1:NNest_LSel])
   # mu_L[1:NNest_LSel] <- rep(0, NNest_LSel)
   # omega_L_S[1:NNest_LSel,1:NNest_LSel] ~ dwish(R_L_S[1:NNest_LSel,1:NNest_LSel],NNest_LSel)
@@ -41,7 +41,8 @@ NHQ.code <- nimbleCode({
     y_L[i, 1:11] ~ dmulti(p_L[i,1:11], 1)
     for(j in 1:11){
       p_L[i,j] <- e_L[i,j]/inprod(wt_L[i,1:11],e_L[i,1:11])
-      log(e_L[i,j]) <- alpha_L_Slp[NestID_L[i]]*cov_LSel[j,scale_LSel,i] + beta_SC_LSel*cov_LSel[j,scale_LSel,i]
+      # log(e_L[i,j]) <- alpha_L_Slp[NestID_L[i]]*cov_LSel[j,scale_LSel,i] + beta_SC_LSel*cov_LSel[j,scale_LSel,i]
+      log(e_L[i,j]) <- beta_SC_LSel*cov_LSel[j,scale_LSel,i]
     }
   }
   
@@ -62,16 +63,16 @@ NHQ.data <- list(
 NHQ.constants <- list(
   ### Laying Selection ###
   NestID_L = Ind_LSel, # Numeric Nest ID
-  NGrp_LSel = NInd_LSel, # Count of Used/Available Groups
-  NNest_LSel = N_LSel # Count of Individual Nests
+  NGrp_LSel = NInd_LSel # Count of Used/Available Groups
+  # NNest_LSel = N_LSel # Count of Individual Nests
 )
 
 NHQ.initial <- list(
   ### Laying Selection ###
   scale_LSel = 1,
-  beta_SC_LSel = 0,
-  alpha_L_Slp = rep(0, N_LSel),
-  omega_L_S = diag(rep(1, N_LSel))
+  beta_SC_LSel = 0
+  # alpha_L_Slp = rep(0, N_LSel),
+  # omega_L_S = diag(rep(1, N_LSel))
 )
 
 
@@ -80,8 +81,8 @@ NHQ.initial <- list(
 NHQ.monitor <- c(
   ### Laying Selection ###
   "beta_SC_LSel",
-  "scale_LSel",
-  "alpha_L_Slp"
+  "scale_LSel"
+  # "alpha_L_Slp"
 )
 
 NHQ.dimensions <- list(

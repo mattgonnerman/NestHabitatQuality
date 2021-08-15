@@ -11,8 +11,15 @@ source(file = "NIMBLE IndComp Version/NestHabitatQuality - 1 IndComp NIMBLE Data
 ### Perform BLISS Scale Selection ###
 source(file = "NIMBLE IndComp Version/NestHabitatQuality - 3 Scale Selection.R")
 
-### Model Selection using best scale for each ###
-
+### Model Selection ###
+#https://docs.pymc.io/notebooks/model_averaging.html
+waicscores <- read.csv("Scale Selection WAIC Outputs.csv") %>%
+  group_by(Component) %>%
+  mutate(DeltaWAIC = (exp(-.5*WAIC))) %>%
+  mutate(Weight = DeltaWAIC/sum(DeltaWAIC)) %>%
+  arrange(Component, WAIC) %>%
+  mutate(CumulWeight = cumsum(Weight)) %>%
+  ungroup() 
 
 ### Final Model Run ###
 
