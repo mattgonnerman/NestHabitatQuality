@@ -20,6 +20,19 @@ waicscores <- read.csv("Scale Selection WAIC Outputs.csv") %>%
   arrange(Component, WAIC) %>%
   mutate(CumulWeight = cumsum(Weight)) %>%
   ungroup() 
+waicscores2 <- read.csv("Scale Selection WAIC Outputs.csv") %>%
+  group_by(Component) %>%
+  mutate(WAIC = WAIC/1000) %>%
+  mutate(DeltaWAIC = (exp(-.5*WAIC))) %>%
+  mutate(Weight = DeltaWAIC/sum(DeltaWAIC)) %>%
+  arrange(Component, WAIC) %>%
+  mutate(CumulWeight = cumsum(Weight)) %>%
+  ungroup() 
+waicscores3 <- read.csv("Scale Selection WAIC Outputs.csv")
+
+for(i in 1:10){
+  waicscores3$Weights[i] <- exp(-.5*waicscores3$WAIC[i])/sum(exp(-.5*waicscores3$WAIC[1:10]))
+}
 
 ### Final Model Run ###
 
