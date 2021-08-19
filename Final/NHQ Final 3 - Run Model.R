@@ -30,9 +30,9 @@ rm(list=setdiff(ls(),
 gc()
 
 # MCMC settings
-ni <- 30000 #number of iterations
+ni <- 40000 #number of iterations
 nt <- 1 #thinning
-nb <- 25000 #burn in period
+nb <- 35000 #burn in period
 nc <- 1 #number of chains/parallel cores
 
 NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
