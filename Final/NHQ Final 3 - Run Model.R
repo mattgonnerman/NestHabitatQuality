@@ -7,11 +7,9 @@ source("./Final/NHQ Final 1 - Data Prep.R")
 source("./Final/NHQ Final 2 - rNimble Prep.R")
 
 ### Nimble Code
-# MCMC settings
-ni <- 30000 #number of iterations
-nt <- 1 #thinning
-nb <- 25000 #burn in period
-nc <- 1 #number of chains/parallel cores
+rm(list=setdiff(ls(),
+                c("NHQ.code", "NHQ.constants", "NHQ.initial", "NHQ.data", "NHQ.monitor")))
+gc()
 
 NHQ.model <- nimbleModel(code = NHQ.code,
                          constants = NHQ.constants,
@@ -28,8 +26,14 @@ NHQ.MCMC <- buildMCMC(NHQ.conf.mcmc)
 NHQ.comp.MCMC <- compileNimble(NHQ.MCMC)
 
 rm(list=setdiff(ls(),
-                c("NHQ.comp.MCMC", "ni", 'nc', "nb", "nt")))
+                c("NHQ.comp.MCMC")))
 gc()
+
+# MCMC settings
+ni <- 30000 #number of iterations
+nt <- 1 #thinning
+nb <- 25000 #burn in period
+nc <- 1 #number of chains/parallel cores
 
 NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
                             niter = ni,
@@ -41,4 +45,3 @@ NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
 
 write.csv(NHQ.samples.MCMC, "./Final/Final Model Summary.csv")
 
-tail(NHQ.samples.MCMC$summary)
