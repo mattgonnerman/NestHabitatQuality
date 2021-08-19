@@ -136,67 +136,11 @@ NHQ.code <- nimbleCode({
   #############################################################################
   
   ### Habitat Quality ###
-  PLS_max <- max(exp(beta_SC_PLSel[1]*cov_NHQ[1:nNHQ,1] +
-                       beta_SC_PLSel[2]*cov_NHQ[1:nNHQ,2] +
-                       beta_SC_PLSel[3]*cov_NHQ[1:nNHQ,3] +
-                       beta_SC_PLSel[4]*cov_NHQ[1:nNHQ,4] +
-                       beta_SC_PLSel[5]*cov_NHQ[1:nNHQ,5] +
-                       beta_SC_PLSel[6]*cov_NHQ[1:nNHQ,6] +
-                       beta_SC_PLSel[7]*cov_NHQ[1:nNHQ,7] +
-                       beta_SC_PLSel[8]*cov_NHQ[1:nNHQ,8] +
-                       beta_SC_PLSel[9]*cov_NHQ[1:nNHQ,9] +
-                       beta_SC_PLSel[10]*cov_NHQ[1:nNHQ,10]))
-
-  LS_max <- max(exp(beta_SC_LSel[1]*cov_NHQ[1:nNHQ,11] +
-                      beta_SC_LSel[2]*cov_NHQ[1:nNHQ,12] +
-                      beta_SC_LSel[3]*cov_NHQ[1:nNHQ,13] +
-                      beta_SC_LSel[4]*cov_NHQ[1:nNHQ,14] +
-                      beta_SC_LSel[5]*cov_NHQ[1:nNHQ,15] +
-                      beta_SC_LSel[6]*cov_NHQ[1:nNHQ,16] +
-                      beta_SC_LSel[7]*cov_NHQ[1:nNHQ,17] +
-                      beta_SC_LSel[8]*cov_NHQ[1:nNHQ,18] +
-                      beta_SC_LSel[9]*cov_NHQ[1:nNHQ,19] +
-                      beta_SC_LSel[10]*cov_NHQ[1:nNHQ,20]))
-
-  NS_max <- max(exp(beta_SC_NSel[1]*cov_NHQ[1:nNHQ,21] +
-                      beta_SC_NSel[2]*cov_NHQ[1:nNHQ,22] +
-                      beta_SC_NSel[3]*cov_NHQ[1:nNHQ,23] +
-                      beta_SC_NSel[4]*cov_NHQ[1:nNHQ,24] +
-                      beta_SC_NSel[5]*cov_NHQ[1:nNHQ,25] +
-                      beta_SC_NSel[6]*cov_NHQ[1:nNHQ,26] +
-                      beta_SC_NSel[7]*cov_NHQ[1:nNHQ,27] +
-                      beta_SC_NSel[8]*cov_NHQ[1:nNHQ,28] +
-                      beta_SC_NSel[9]*cov_NHQ[1:nNHQ,29] +
-                      beta_SC_NSel[10]*cov_NHQ[1:nNHQ,30]))
-    
-  NSucc_max <- max((1/(1 + exp(intercept_NDSR +
-                                 beta_SC_NDSR[1]*cov_NHQ[1:nNHQ,31] +
-                                 beta_SC_NDSR[2]*cov_NHQ[1:nNHQ,32] +
-                                 beta_SC_NDSR[3]*cov_NHQ[1:nNHQ,33] +
-                                 beta_SC_NDSR[4]*cov_NHQ[1:nNHQ,34] +
-                                 beta_SC_NDSR[5]*cov_NHQ[1:nNHQ,35] +
-                                 beta_SC_NDSR[6]*cov_NHQ[1:nNHQ,36] +
-                                 beta_SC_NDSR[7]*cov_NHQ[1:nNHQ,37] +
-                                 beta_SC_NDSR[8]*cov_NHQ[1:nNHQ,38] +
-                                 beta_SC_NDSR[9]*cov_NHQ[1:nNHQ,39] +
-                                 beta_SC_NDSR[10]*cov_NHQ[1:nNHQ,40]
-                                 ) +
-                         exp(intercept_HDSR +
-                               beta_SC_HDSR[1]*cov_NHQ[1:nNHQ,41] +
-                               beta_SC_HDSR[2]*cov_NHQ[1:nNHQ,42] +
-                               beta_SC_HDSR[3]*cov_NHQ[1:nNHQ,43] +
-                               beta_SC_HDSR[4]*cov_NHQ[1:nNHQ,44] +
-                               beta_SC_HDSR[5]*cov_NHQ[1:nNHQ,45] +
-                               beta_SC_HDSR[6]*cov_NHQ[1:nNHQ,46] +
-                               beta_SC_HDSR[7]*cov_NHQ[1:nNHQ,47] +
-                               beta_SC_HDSR[8]*cov_NHQ[1:nNHQ,48] +
-                               beta_SC_HDSR[9]*cov_NHQ[1:nNHQ,49] +
-                               beta_SC_HDSR[10]*cov_NHQ[1:nNHQ,50]
-                         ))))^40
+  
   
   for(i in 1:nNHQ){
     #Nesting Habitat Quality Metric
-    NHQ[i] <- (exp(beta_SC_PLSel[1]*cov_NHQ[i,1] +
+    NHQ[i] <- ilogit(beta_SC_PLSel[1]*cov_NHQ[i,1] +
                      beta_SC_PLSel[2]*cov_NHQ[i,2] +
                      beta_SC_PLSel[3]*cov_NHQ[i,3] +
                      beta_SC_PLSel[4]*cov_NHQ[i,4] +
@@ -205,9 +149,9 @@ NHQ.code <- nimbleCode({
                      beta_SC_PLSel[7]*cov_NHQ[i,7] +
                      beta_SC_PLSel[8]*cov_NHQ[i,8] +
                      beta_SC_PLSel[9]*cov_NHQ[i,9] +
-                     beta_SC_PLSel[10]*cov_NHQ[i,10])/PLS_max) *
+                     beta_SC_PLSel[10]*cov_NHQ[i,10]) *
       
-      (exp(beta_SC_LSel[1]*cov_NHQ[i,11] +
+      ilogit(beta_SC_LSel[1]*cov_NHQ[i,11] +
              beta_SC_LSel[2]*cov_NHQ[i,12] +
              beta_SC_LSel[3]*cov_NHQ[i,13] +
              beta_SC_LSel[4]*cov_NHQ[i,14] +
@@ -216,9 +160,9 @@ NHQ.code <- nimbleCode({
              beta_SC_LSel[7]*cov_NHQ[i,17] +
              beta_SC_LSel[8]*cov_NHQ[i,18] +
              beta_SC_LSel[9]*cov_NHQ[i,19] +
-             beta_SC_LSel[10]*cov_NHQ[i,20])/LS_max) *
+             beta_SC_LSel[10]*cov_NHQ[i,20]) *
       
-      (exp(beta_SC_NSel[1]*cov_NHQ[i,21] +
+      ilogit(beta_SC_NSel[1]*cov_NHQ[i,21] +
              beta_SC_NSel[2]*cov_NHQ[i,22] +
              beta_SC_NSel[3]*cov_NHQ[i,23] +
              beta_SC_NSel[4]*cov_NHQ[i,24] +
@@ -227,9 +171,9 @@ NHQ.code <- nimbleCode({
              beta_SC_NSel[7]*cov_NHQ[i,27] +
              beta_SC_NSel[8]*cov_NHQ[i,28] +
              beta_SC_NSel[9]*cov_NHQ[i,29] +
-             beta_SC_NSel[10]*cov_NHQ[i,30])/NS_max) * 
+             beta_SC_NSel[10]*cov_NHQ[i,30]) * 
       
-      (((1/(1 + exp(intercept_NDSR +
+      ((1/(1 + exp(intercept_NDSR +
                      beta_SC_NDSR[1]*cov_NHQ[i,31] +
                      beta_SC_NDSR[2]*cov_NHQ[i,32] +
                      beta_SC_NDSR[3]*cov_NHQ[i,33] +
@@ -250,7 +194,7 @@ NHQ.code <- nimbleCode({
                    beta_SC_HDSR[7]*cov_NHQ[i,47] +
                    beta_SC_HDSR[8]*cov_NHQ[i,48] +
                    beta_SC_HDSR[9]*cov_NHQ[i,49] +
-                   beta_SC_HDSR[10]*cov_NHQ[i,50])))^40)/NSucc_max)
+                   beta_SC_HDSR[10]*cov_NHQ[i,50])))^40)
   }
 })
 
