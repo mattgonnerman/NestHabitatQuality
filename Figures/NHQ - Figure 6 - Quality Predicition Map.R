@@ -25,13 +25,14 @@ NHQ.points <- NHQ.covs %>%
          Err_Range = UCL-LCL,)
 NHQ.raster <- raster(NHQ.points, crs = crs(NHQ.points), vals = 0, resolution = 500, ext = extend(extent(NHQ.points), 2000))
 NHQ.raster <- shift(NHQ.raster, dx = 250, dy = 250)
-NHQ.raster <- rasterize(st_coordinates(NHQ.points)[,1:2], NHQ.raster, field = log(NHQ.points$Mean))
+NHQ.raster <- rasterize(st_coordinates(NHQ.points)[,1:2], NHQ.raster, field = NHQ.points$Mean)
 NHQ.raster <- crop(NHQ.raster, NHQ.covs)
 NHQ.raster <- projectRaster(NHQ.raster, crs = 4326)
 NHQ.raster <- crop(NHQ.raster, extent(NHQ.raster, 10, nrow(NHQ.raster)-9, 10, ncol(NHQ.raster)-9))
 
-nhqmean.df <- as.data.frame(xyFromCell(NHQ.raster, 1:ncell(NHQ.raster)))
-nhqmean.df$NHQ_logMean <- getValues(NHQ.raster)
+nhqmean.df <- as.data.frame(xyFromCell(NHQ.raster, 1:ncell(NHQ.raster))) %>%
+  rename(lon = x, lat = y)
+nhqmean.df$NHQ_Mean <- getValues(NHQ.raster)
 
 ### State Boundary
 statepoly <- st_read("E:/Maine Drive/GIS/Maine_Town_and_Townships_Boundary_Polygons_Feature.shp") %>%
@@ -51,13 +52,14 @@ nestsites <- st_read("./GIS/NestSuccess_Covs_Z.shp") %>%
 nestsites$x <- st_coordinates(nestsites)[,1]
 nestsites$y <- st_coordinates(nestsites)[,2]
 nestcrop <- st_transform(NHQ.covs, 4326)
-nestsites <- st_crop(nestsites, nestcrop)
+nestsites <- st_crop(nestsites, nestcrop) %>%
+  rename(lat = y, lon = x)
 
 ### City points and Major Roads
 cities <- st_centroid(statepoly) %>%
   st_transform(4326)
-cities$x <- st_coordinates(cities)[,1]
-cities$y <- st_coordinates(cities)[,2]
+cities$lon <- st_coordinates(cities)[,1]
+cities$lat <- st_coordinates(cities)[,2]
 cities <- st_crop(cities, nestcrop) %>%
   filter(TOWN %in% c("Bangor", "Unity", "Greenfield Twp", "Charleston"))
 
@@ -76,8 +78,8 @@ trap.raw <- read.csv("Trapping - Data.csv") %>%
 capsites.trans <- merge(capsites.sf, trap.raw, by = "CapLoc", all.y = T) %>%
   dplyr::select(CapLoc) %>%
   distinct()
-capsites.trans$x <- st_coordinates(capsites.trans)[,1]
-capsites.trans$y <- st_coordinates(capsites.trans)[,2]
+capsites.trans$lon <- st_coordinates(capsites.trans)[,1]
+capsites.trans$lat <- st_coordinates(capsites.trans)[,2]
 
 #################################################
 ### Map of Study Area depicting NHQ estimates ###
@@ -95,17 +97,19 @@ myMap <- get_stamenmap(bbox = c(left = min(nhqmean.df$x),
                        color = "color")
 
 
-ggmap(myMap) +
-  geom_tile(data = nhqmean.df, aes(fill = NHQ_logMean)) +
-  # geom_sf(data = nestsites, color = "red", shape = 17, size = 2) +
-  # geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 2) +
-  # # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
-  # geom_sf_text(data = cities, aes(label = TOWN), alpha = .6) +
-  # scale_fill_gradientn(name = "Habitat\nQuality\n(log)", colors = terrain.colors(10), na.value = NA) +
-  # theme_linedraw() +
-  coord_sf(xlim = c(min(nhqmean.df$x[which(!is.na(nhqmean.df$NHQ_logMean))]), max(nhqmean.df$x[which(!is.na(nhqmean.df$NHQ_logMean))])),
-            ylim = c(min(nhqmean.df$y[which(!is.na(nhqmean.df$NHQ_logMean))]), max(nhqmean.df$y[which(!is.na(nhqmean.df$NHQ_logMean))])),
+predict.map <- ggmap(myMap) +
+  geom_tile(data = nhqmean.df, aes(fill = NHQ_Mean)) +
+  geom_sf(data = nestsites, color = "red", shape = 17, size = 2) +
+  geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 2) +
+  # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
+  geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 7) +
+  scale_fill_gradientn(name = "Habitat\nQuality", colors = terrain.colors(10), na.value = NA) +
+  theme_linedraw(base_size = 24) +
+  coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
+            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F, label_graticule = "NSEW") +
-  ylab("") + xlab("") 
+  ylab("") + xlab("")
 
-  
+
+ggsave(predict.map, file = "./Figures/Fig6 - Prediction Surface.jpg",
+       height = 16, width = 24)

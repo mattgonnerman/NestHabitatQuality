@@ -40,7 +40,8 @@ nest.vhf.used <- st_read("./GIS/nest.vhf.used.points.shp") %>%
   filter(NestID == "362-2018-1") %>%
   st_transform(4326)
 
-capsites <- st_read("./GIS/CaptureSites.shp")
+capsites <- st_read("./GIS/CaptureSites.shp")%>%
+  st_transform(4326)
 
 myMap <- get_stamenmap(bbox = c(left = -68.415,
                                 bottom = 44.92,
@@ -58,4 +59,5 @@ ggmap(myMap) +
   geom_sf(data = laying.gps.avail, inherit.aes = FALSE) +
   geom_sf(data = laying.gps.used, inherit.aes = FALSE) +
   geom_sf(data = nest.gps.avail, inherit.aes = FALSE) +
-  geom_sf(data = nest.gps.used, inherit.aes = FALSE) 
+  geom_sf(data = nest.gps.used, inherit.aes = FALSE, color = "red", size = 3) +
+  geom_sf(data = capsites, inherit.aes = FALSE, color = "green", size = 3) 
