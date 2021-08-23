@@ -43,7 +43,8 @@ nest.vhf.used <- st_read("./GIS/nest.vhf.used.points.shp") %>%
 capsites <- st_read("./GIS/CaptureSites.shp")%>%
   st_transform(4326)
 
-myMap <- get_stamenmap(bbox = c(left = -68.415,
+### GPS MAP
+gpsMap <- get_stamenmap(bbox = c(left = -68.415,
                                 bottom = 44.92,
                                 right = -68.365,
                                 top = 44.963),
@@ -52,12 +53,53 @@ myMap <- get_stamenmap(bbox = c(left = -68.415,
                        zoom = 11,
                        color = "color")
 
-ggmap(myMap) +
-  # coord_sf(crs = st_crs(32619)) + # force the ggplot2 map to be in 3857
-  geom_sf(data = prelaying.gps.avail, inherit.aes = FALSE) +
-  geom_sf(data = prelaying.gps.used, inherit.aes = FALSE) +
-  geom_sf(data = laying.gps.avail, inherit.aes = FALSE) +
-  geom_sf(data = laying.gps.used, inherit.aes = FALSE) +
-  geom_sf(data = nest.gps.avail, inherit.aes = FALSE) +
-  geom_sf(data = nest.gps.used, inherit.aes = FALSE, color = "red", size = 3) +
-  geom_sf(data = capsites, inherit.aes = FALSE, color = "green", size = 3) 
+gps.map <- ggmap(gpsMap) +
+  coord_sf(crs = st_crs(32619)) + # force the ggplot2 map to be in 3857
+  geom_sf(data = prelaying.gps.avail, fill = NA, aes(color = "Prelaying - Available"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = prelaying.gps.used, fill = NA, aes(color = "Prelaying - Used"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = laying.gps.avail, fill = NA, aes(color = "Laying - Available"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = laying.gps.used, fill = NA, aes(color = "Laying - Used"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = nest.gps.avail, fill = NA, aes(color = "Nest Site - Available"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = nest.gps.used, aes(color = "Nest Site - Used"), inherit.aes = FALSE, size = 3) +
+  geom_sf(data = capsites, aes(color = "Capture Site"), inherit.aes = FALSE, size = 3) +
+  scale_color_manual(name = "Scale", values = c("#003f5c", "#374c80", "#7a5195","#ef5675","#ef5675","#ff764a", "#ffa600"),
+                     labels = c("Capture Site", "Prelaying - Available", "Prelaying - Used",
+                                "Laying - Available", "Laying - Used", "Nest Site - Available", "Nest Site - Used")) +
+  # scale_fill_manual(name = "Scale", values = alpha(c("#003f5c", "#374c80", "#7a5195","#ef5675","#ef5675","#ff764a", "#ffa600"), 0),
+  #                    labels = c("Capture Site", "Prelaying - Available", "Prelaying - Used",
+  #                               "Laying - Available", "Laying - Used", "Nest Site - Available", "Nest Site - Used")) +
+  theme_linedraw() +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(override.aes = list(fill = c("#003f5c", "#374c80", "#7a5195","#ef5675","#ef5675","#ff764a", "#ffa600"))))
+
+
+### GPS MAP
+vhfMap <- get_stamenmap(bbox = c(left = -68.47,
+                                bottom = 45.05,
+                                right = -68.3,
+                                top = 45.085 ),
+                       maptype = "terrain-background",
+                       crop = T,
+                       zoom = 11,
+                       color = "color")
+
+vhf.map <- ggmap(vhfMap) +
+  coord_sf(crs = st_crs(32619)) + # force the ggplot2 map to be in 3857
+  geom_sf(data = prelaying.vhf.avail, fill = NA, aes(color = "Prelaying - Available"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = prelaying.vhf.used, fill = NA, aes(color = "Prelaying - Used"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = laying.vhf.avail, fill = NA, aes(color = "Laying - Available"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = laying.vhf.used, fill = NA, aes(color = "Laying - Used"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = nest.vhf.avail, fill = NA, aes(color = "Nest Site - Available"), inherit.aes = FALSE, lwd = 1.2) +
+  geom_sf(data = nest.vhf.used, aes(color = "Nest Site - Used"), inherit.aes = FALSE, size = 3) +
+  geom_sf(data = capsites, aes(color = "Capture Site"), inherit.aes = FALSE, size = 3) +
+  scale_color_manual(name = "Scale", values = c("#003f5c", "#374c80", "#7a5195","#ef5675","#ef5675","#ff764a", "#ffa600"),
+                     labels = c("Capture Site", "Prelaying - Available", "Prelaying - Used",
+                                "Laying - Available", "Laying - Used", "Nest Site - Available", "Nest Site - Used")) +
+  # scale_fill_manual(name = "Scale", values = alpha(c("#003f5c", "#374c80", "#7a5195","#ef5675","#ef5675","#ff764a", "#ffa600"), 0),
+  #                    labels = c("Capture Site", "Prelaying - Available", "Prelaying - Used",
+  #                               "Laying - Available", "Laying - Used", "Nest Site - Available", "Nest Site - Used")) +
+  theme_linedraw() +
+  theme(legend.position = "bottom") +
+  guides(color = guide_legend(override.aes = list(fill = c("#003f5c", "#374c80", "#7a5195","#ef5675","#ef5675","#ff764a", "#ffa600"))))
+
+vhf.map
