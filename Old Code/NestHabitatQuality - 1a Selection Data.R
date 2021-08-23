@@ -52,7 +52,7 @@ gps_nest_info <- merge(gps_nests, gps.nest.TS, by = c("NestID", "BirdID"), all =
 #####################################################
 ### Used = PreLaying Home Range
 ### Available = Jan 1 through Prelaying Home Range
-
+########################################################################################################################################
 ## GPS BIRDS ##
 # USED
 #Format timestamps for movebank
@@ -109,7 +109,10 @@ prelaying.gps.used.points <- st_as_sf(prelaying.gps.used, coords = c("location_l
 prelaying.gps.used.points <- st_transform(prelaying.gps.used.points, 32619)
 st_write(prelaying.gps.used.points, dsn = "./GIS", layer = "prelaying.gps.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
+prelaying.gps.used.polygon <- st_read("./GIS/prelaying.gps.used.polygon.shp")
+prelaying.gps.used.points <- st_read("./GIS/prelaying.gps.used.points.shp")
 
+########################################################################################################################################
 # AVAILABLE
 #Format timestamps for movebank
 prelaying.gps.avail.times <- gps_nest_info %>%
@@ -174,7 +177,11 @@ prelaying.gps.avail.points <- st_transform(prelaying.gps.avail.points, 32619)
 st_write(prelaying.gps.avail.polygon, dsn = "./GIS", layer = "prelaying.gps.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(prelaying.gps.avail.points, dsn = "./GIS", layer = "prelaying.gps.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
+prelaying.gps.avail.polygon <- st_read("./GIS/prelaying.gps.avail.polygon.shp")
+prelaying.gps.avail.points <- st_read("./GIS/prelaying.gps.avail.points.shp")
 
+
+########################################################################################################################################
 ## VHF BIRDS ##
 # USED
 #Use area of prelaying home range for GPS birds to determine buffer for VHF birds
@@ -204,52 +211,14 @@ st_geometry(prelaying.vhf.used.points) <- "geometry"
 st_write(prelaying.vhf.used.polygon, dsn = "./GIS", layer = "prelaying.vhf.used.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(prelaying.vhf.used.points, dsn = "./GIS", layer = "prelaying.vhf.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
+prelaying.vhf.used.polygon <- st_read("./GIS/prelaying.vhf.used.polygon.shp")
+prelaying.vhf.used.points <- st_read("./GIS/prelaying.vhf.used.points.shp")
 
+########################################################################################################################################
 #AVAILABLE 
 #Create a line from capture to nest, then buffer it using the radius of prenesting home range
 vhf.nests.xy <- vhf_nests %>% dplyr::select(NestID, x = NestLong, y = NestLat)
 vhf.cap.xy <- vhf_nests %>% dplyr::select(NestID, x = CapLong, y = CapLat)
-
-# #For birds that nested the year following capture, need a different location. Use first telemetry location of that year
-# nestfollowingyear <- vhf_nests[which(year(vhf_nests$LayDate) != year(vhf_nests$CapDate)),] %>%
-#   mutate(NestID = paste(BirdID, NestYear, 1, sep = "-"))
-# firstlocationofyear <- read.csv("Telemetry_Data - Telemetry.csv") %>%
-#   mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>%
-#   dplyr::select(BirdID = AlumBand, CapLat = Lat1, CapLong = Long1, Date, Fate) %>%
-#   mutate(NestID = paste(BirdID, year(Date), 1, sep = "-")) %>%
-#   filter(NestID %in% nestfollowingyear$NestID) %>%
-#   group_by(NestID) %>%
-#   arrange(Date) %>%
-#   slice(1L)
-# 
-# telempoint <- st_as_sf(firstlocationofyear, coords = c("CapLong", "CapLat"), crs = 4326) %>%
-#   arrange(NestID)
-# cappoint <- st_as_sf(vhf.cap.xy[which(vhf.cap.xy$NestID %in% firstlocationofyear$NestID),], coords = c("x", "y"), crs = 4326) %>%
-#   arrange(NestID)
-# 
-# mean(st_distance(telempoint, cappoint, by_element = T))
-# 
-# firstlocationofyear_all <- read.csv("Telemetry_Data - Telemetry.csv") %>%
-#   mutate(Date = as.Date(Date, format = "%m/%d/%Y")) %>%
-#   dplyr::select(BirdID = AlumBand, CapLat = Lat1, CapLong = Long1, Date, Fate) %>%
-#   mutate(NestID = paste(BirdID, year(Date), 1, sep = "-")) %>%
-#   filter(NestID %in% vhf.nests.xy$NestID) %>%
-#   group_by(NestID) %>%
-#   arrange(Date) %>%
-#   filter(!is.na(CapLat)) %>%
-#   slice(1L)
-# telempoint_all <- st_as_sf(firstlocationofyear_all, coords = c("CapLong", "CapLat"), crs = 4326) %>%
-#   arrange(NestID)
-# cappoint_all <- st_as_sf(vhf.cap.xy[which(vhf.cap.xy$NestID %in% firstlocationofyear_all$NestID),], coords = c("x", "y"), crs = 4326) %>%
-#   arrange(NestID)
-# mean(st_distance(telempoint_all, cappoint_all, by_element = T))
-# 
-# for(i in 1:nrow(firstlocationofyear)){
-#   vhf.cap.xy$x[which(vhf.cap.xy$NestID==firstlocationofyear$NestID[i])] <- firstlocationofyear$CapLong[i]
-#   vhf.cap.xy$y[which(vhf.cap.xy$NestID==firstlocationofyear$NestID[i])] <- firstlocationofyear$CapLat[i]
-# }
-
-
 
 #Combine nest and capture/first of year locations and create shapefiles
 vhf.xy <- rbind(vhf.nests.xy, vhf.cap.xy) %>%
@@ -283,7 +252,8 @@ st_geometry(prelaying.vhf.avail.points) <- "geometry"
 st_write(prelaying.vhf.avail.polygon, dsn = "./GIS", layer = "prelaying.vhf.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(prelaying.vhf.avail.points, dsn = "./GIS", layer = "prelaying.vhf.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
-
+prelaying.vhf.avail.polygon <- st_read("./GIS/prelaying.vhf.avail.polygon.shp")
+prelaying.vhf.avail.points <- st_read("./GIS/prelaying.vhf.avail.points.shp")
 
 
 #################################################
@@ -291,7 +261,7 @@ st_write(prelaying.vhf.avail.points, dsn = "./GIS", layer = "prelaying.vhf.avail
 #################################################
 ### Used = Laying Home Range
 ### Available = PreLaying + Laying Home Range 
-
+########################################################################################################################################
 ## GPS BIRDS ##
 # USED
 #Format timestamps for movebank
@@ -348,7 +318,10 @@ laying.gps.used.points <- st_as_sf(laying.gps.used, coords = c("location_long", 
 laying.gps.used.points <- st_transform(laying.gps.used.points, 32619)
 st_write(laying.gps.used.points, dsn = "./GIS", layer = "laying.gps.used.points", driver = "ESRI Shapefile", delete_layer = T)
 
+laying.gps.used.polygon <- st_read("./GIS/laying.gps.used.polygon.shp")
+laying.gps.used.points <- st_read("./GIS/laying.gps.used.points.shp")
 
+########################################################################################################################################
 # AVAILABLE
 #Format timestamps for movebank
 laying.gps.avail.times <- gps_nest_info %>%
@@ -410,7 +383,9 @@ st_geometry(laying.gps.avail.points) <- "geometry"
 st_write(laying.gps.avail.polygon, dsn = "./GIS", layer = "laying.gps.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(laying.gps.avail.points, dsn = "./GIS", layer = "laying.gps.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
-
+laying.gps.avail.polygon <- st_read("./GIS/laying.gps.avail.polygon.shp")
+laying.gps.avail.points <- st_read("./GIS/laying.gps.avail.points.shp")
+########################################################################################################################################
 ## VHF BIRDS ##
 # USED
 #Use area of laying home range for GPS birds to determine buffer for VHF birds
@@ -439,7 +414,9 @@ st_geometry(laying.vhf.used.points) <- "geometry"
 #Save relevant polygons/points as shapefiles
 st_write(laying.vhf.used.polygon, dsn = "./GIS", layer = "laying.vhf.used.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(laying.vhf.used.points, dsn = "./GIS", layer = "laying.vhf.used.points", driver = "ESRI Shapefile", delete_layer = T)
-
+laying.vhf.used.polygon <- st_read("./GIS/laying.vhf.used.polygon.shp")
+laying.vhf.used.points <- st_read("./GIS/laying.vhf.used.points.shp")
+########################################################################################################################################
 # AVAILABLE
 laying.vhf.avail.polygon <- prelaying.vhf.used.polygon
 
@@ -461,8 +438,12 @@ st_geometry(laying.vhf.avail.points) <- "geometry"
 st_write(laying.vhf.avail.polygon, dsn = "./GIS", layer = "laying.vhf.avail.polygon", driver = "ESRI Shapefile", delete_layer = T)
 st_write(laying.vhf.avail.points, dsn = "./GIS", layer = "laying.vhf.avail.points", driver = "ESRI Shapefile", delete_layer = T)
 
+laying.vhf.avail.polygon <- st_read("./GIS/laying.vhf.avail.polygon.shp")
+laying.vhf.avail.points <- st_read("./GIS/laying.vhf.avail.points.shp")
 
-
+ggplot(data = laying.vhf.avail.points %>% filter(NestID == laying.vhf.avail.polygon$NestID[1])) +
+  geom_sf(color = "red") +
+  geom_sf(data = laying.vhf.used.points %>% filter(NestID == laying.vhf.avail.polygon$NestID[1]), color = "blue")
 
 ####################################################
 ### Nest Site Selection Used and Available Sites ###
