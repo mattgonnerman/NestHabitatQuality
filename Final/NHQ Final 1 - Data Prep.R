@@ -350,6 +350,8 @@ nhq.scale.msd <- data.frame(Comp = c(rep("PLSel",10),rep("LSel",10),rep("NSel",1
 
 nhq.scale.msd$Cov == colnames(cov_NHQ)
 
+write.csv(nhq.scale.msd, "./ZStand_MeanSD.csv", row.names = F)
+
 for(i in 1:nrow(nhq.scale.msd)){
   for(j in 1:nrow(cov_NHQ)){
     cov_NHQ[j,i] <- (cov_NHQ[j,i] - nhq.scale.msd$Mean[i])/nhq.scale.msd$SD[i]

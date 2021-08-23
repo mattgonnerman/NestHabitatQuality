@@ -137,11 +137,15 @@ names(rasterlist) <- c("ag_foc1","ag_foc2","ag_foc3","ag_foc4",
 
 #Load polygon of Maine for use in creating grid
 #Subset polygons to just the towns that makeup the core Bangor study area
-mainepoly <- st_read("E:/Maine Drive/GIS/Maine_Boundaries_Town_and_Townships_Polygon-shp/BangorAreaTowns.shp")
+## Extent used for 500m spaces
+# mainepoly <- st_read("E:/Maine Drive/GIS/Maine_Boundaries_Town_and_Townships_Polygon-shp/BangorAreaTowns.shp")
+## Subset and sample at 90m to see how relationships change
+mainepoly <- st_read("E:/Maine Drive/GIS/Maine_Boundaries_Town_and_Townships_Polygon-shp/BangorAreaTowns.shp") %>%
+  filter(TOWN %in% c("Bangor", "Orono", "Veazie"))
 mainepoly <- st_union(mainepoly)
 
 ### Create points to extract raster values to
-NHQpoints <- st_as_sf(st_make_grid(mainepoly, cellsize = 30, what = "centers"))
+NHQpoints <- st_as_sf(st_make_grid(mainepoly, cellsize = 90, what = "centers"))
 
 #Create an R cluster using all the machine cores minus one
 sfInit(parallel=TRUE, cpus=parallel:::detectCores()-1)
@@ -162,5 +166,7 @@ NHQ.covs <- cbind(NHQpoints, NHQ.extract) %>%
   filter(!is.na(D2Road_foc4)) %>%
   filter(!is.na(HT_foc4)) %>%
   filter(!is.na(D2Rip_foc4))
-st_write(NHQ.covs, "./GIS/NHQ_covs.shp", delete_layer = T)
-NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
+# st_write(NHQ.covs, "./GIS/NHQ_covs.shp", delete_layer = T)
+# NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
+st_write(NHQ.covs, "./GIS/NHQ_covs_90m.shp", delete_layer = T)
+NHQ.covs <- st_read("./GIS/NHQ_covs_90m.shp")
