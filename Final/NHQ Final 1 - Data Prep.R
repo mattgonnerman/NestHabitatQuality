@@ -298,7 +298,8 @@ for(i in 1:10){
 
 ##################################################################################
 ### NHQ Inputs
-NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
+# NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
+NHQ.covs <- st_read("./GIS/NHQ_covs_90m.shp")
 NHQ.covs <- st_transform(NHQ.covs, 32619)
 
 nNHQ <- nrow(NHQ.covs)
