@@ -365,19 +365,22 @@ names(rasterlist) <- c("ag_foc1","ag_foc2","ag_foc3","ag_foc4",
 #https://gis.stackexchange.com/questions/253618/r-multicore-approach-to-extract-raster-values-using-spatial-points
 
 ### PreLaying Selection
-pl.vhf.used <- st_read("./GIS/prelaying.vhf.used.points.shp") %>%
+pl.vhf.used <- st_read("./GIS/C_PLSUsedVHF.shp") %>%
   mutate(Used = 1) %>%
-  mutate(GPS = 0)
-pl.vhf.avail <- st_read("./GIS/prelaying.vhf.avail.points.shp")%>%
+  mutate(GPS = 0) %>%
+  dplyr::select(NestID, Used, GPS)
+pl.vhf.avail <- st_read("./GIS/C_PLSAvailVHF.shp")%>%
   mutate(Used = 0) %>%
-  mutate(GPS = 0)
+  mutate(GPS = 0) %>%
+  dplyr::select(NestID, Used, GPS)
 pl.gps.used <- st_read("./GIS/prelaying.gps.used.points.shp")%>%
   mutate(Used = 1) %>%
   mutate(GPS = 1) %>%
   dplyr::select(-timestamp)
-pl.gps.avail <- st_read("./GIS/prelaying.gps.avail.points.shp")%>%
+pl.gps.avail <- st_read("./GIS/C_PLSAvailGPS.shp")%>%
   mutate(Used = 0) %>%
-  mutate(GPS = 1)
+  mutate(GPS = 1) %>%
+  dplyr::select(NestID, Used, GPS)
 
 prelaying.points <- rbind(pl.vhf.used, pl.vhf.avail, pl.gps.used, pl.gps.avail)
 
@@ -401,19 +404,22 @@ prelaying.covs.z <- prelaying.covs %>%
 st_write(prelaying.covs.z, "./GIS/Prelaying_Covs_Z.shp", delete_layer = T)
 
 ### Laying Selection
-lay.vhf.used <- st_read("./GIS/laying.vhf.used.points.shp") %>%
+lay.vhf.used <- st_read("./GIS/C_LSUsedVHF.shp") %>%
   mutate(Used = 1) %>%
-  mutate(GPS = 0)
-lay.vhf.avail <- st_read("./GIS/laying.vhf.avail.points.shp")%>%
+  mutate(GPS = 0) %>%
+  dplyr::select(NestID, Used, GPS)
+lay.vhf.avail <- st_read("./GIS/C_LSAvailVHF.shp")%>%
   mutate(Used = 0) %>%
-  mutate(GPS = 0)
+  mutate(GPS = 0) %>%
+  dplyr::select(NestID, Used, GPS)
 lay.gps.used <- st_read("./GIS/laying.gps.used.points.shp")%>%
   mutate(Used = 1) %>%
   mutate(GPS = 1) %>%
   dplyr::select(-timestamp)
-lay.gps.avail <- st_read("./GIS/laying.gps.avail.points.shp")%>%
+lay.gps.avail <- st_read("./GIS/C_LSAvailGPS.shp")%>%
   mutate(Used = 0) %>%
-  mutate(GPS = 1)
+  mutate(GPS = 1) %>%
+  dplyr::select(NestID, Used, GPS)
 
 laying.points <- rbind(lay.vhf.used, lay.vhf.avail, lay.gps.used, lay.gps.avail)
 
@@ -439,16 +445,20 @@ st_write(laying.covs.z, "./GIS/Laying_Covs_Z.shp", delete_layer = T)
 ### Nest Site Selection
 nest.vhf.used <- st_read("./GIS/nest.vhf.used.points.shp") %>%
   mutate(Used = "1") %>%
-  mutate(GPS = "0")
-nest.vhf.avail <- st_read("./GIS/nest.vhf.avail.points.shp")%>%
+  mutate(GPS = "0") %>%
+  dplyr::select(NestID, Used, GPS)
+nest.vhf.avail <- st_read("./GIS/C_NSAvailVHF.shp")%>%
   mutate(Used = "0") %>%
-  mutate(GPS = "0")
+  mutate(GPS = "0") %>%
+  dplyr::select(NestID, Used, GPS)
 nest.gps.used <- st_read("./GIS/nest.gps.used.points.shp")%>%
   mutate(Used = "1") %>%
-  mutate(GPS = "1")
-nest.gps.avail <- st_read("./GIS/nest.gps.avail.points.shp")%>%
+  mutate(GPS = "1") %>%
+  dplyr::select(NestID, Used, GPS)
+nest.gps.avail <- st_read("./GIS/C_NSAvailGPS.shp")%>%
   mutate(Used = "0") %>%
-  mutate(GPS = "1")
+  mutate(GPS = "1") %>%
+  dplyr::select(NestID, Used, GPS)
 
 nest.points <- rbind(nest.vhf.used, nest.vhf.avail, nest.gps.used, nest.gps.avail)
 
@@ -498,6 +508,3 @@ st_write(nestsuccess.covs, "./GIS/NestSuccess_Covs.shp", delete_layer = T)
 nestsuccess.covs.z <- nestsuccess.covs %>%
   mutate_at(names(rasterlist),funs(c(scale(.))))
 st_write(nestsuccess.covs.z, "./GIS/NestSuccess_Covs_Z.shp", delete_layer = T)
-
-
-### Hen Survival
