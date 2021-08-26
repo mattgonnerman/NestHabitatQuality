@@ -217,8 +217,8 @@ scaleresults %>% filter(Component == "PL")
   
 cov_PLSel1 <- st_drop_geometry(pl.covs) %>%
   dplyr::select(NestID, MergeID,
-                ag_foc3, dev_fc1, shrub_f1, hrb_fc1, BA_foc1,
-                HT_foc1, SW_foc1, D2Edg_2, D2Rd_f1, D2Rp_f2)
+                ag_foc4, dev_fc1, shrub_f1, hrb_fc1, BA_foc1,
+                HT_foc1, SW_foc1, D2Edg_2, D2Rd_f1, D2Rp_f1)
 cov_PLSel2 <- merge(pl.df %>% dplyr::select(NestID, PairID, MergeID, Used), cov_PLSel1, by = c("NestID", "MergeID")) %>%
   arrange(NestID, PairID, desc(Used), MergeID) %>%
   mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
@@ -237,8 +237,8 @@ cov_PLSel <- array(as.numeric(unlist(cov_PLSel3)), dim=c(11, 10, length(cov_PLSe
 scaleresults %>% filter(Component == "L")
 cov_LSel1 <- st_drop_geometry(l.covs) %>%
   dplyr::select(NestID, MergeID,
-                ag_foc1, dev_fc4, shrub_f4, hrb_fc1, BA_foc1,
-                HT_foc1, SW_foc3, D2Edg_2, D2Rd_f4, D2Rp_f3)
+                ag_foc3, dev_fc3, shrub_f1, hrb_fc4, BA_foc1,
+                HT_foc3, SW_foc2, D2Edg_4, D2Rd_f3, D2Rp_f1)
 cov_LSel2 <- merge(l.df %>% dplyr::select(NestID, PairID, MergeID, Used), cov_LSel1, by = c("NestID", "MergeID")) %>%
   arrange(NestID, PairID, desc(Used), MergeID) %>%
   mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
@@ -257,8 +257,8 @@ cov_LSel <- array(as.numeric(unlist(cov_LSel3)), dim=c(11, 10, length(cov_LSel3)
 scaleresults %>% filter(Component == "N")
 cov_NSel1 <- st_drop_geometry(nest.covs) %>%
   dplyr::select(NestID, MergeID,
-                ag_foc4, dev_fc2, shrub_f2, hrb_fc4, BA_foc1,
-                HT_foc1, SW_foc4, D2Edg_4, D2Rd_f1, D2Rp_f3)
+                ag_foc1, dev_fc1, shrub_f1, hrb_fc4, BA_foc1,
+                HT_foc1, SW_foc1, D2Edg_4, D2Rd_f1, D2Rp_f2)
 cov_NSel2 <- merge(nest.df %>% dplyr::select(NestID, PairID, MergeID, Used), cov_NSel1, by = c("NestID", "MergeID")) %>%
   arrange(NestID, PairID, desc(Used), MergeID) %>%
   mutate(ID = as.factor(paste(NestID, PairID, sep = "_"))) %>%
@@ -278,7 +278,7 @@ cov_NSel <- array(as.numeric(unlist(cov_NSel3)), dim=c(11, 10, length(cov_NSel3)
 #NDSR
 scaleresults %>% filter(Component == "NDSR")
 cov_NDSR <- as.matrix(st_drop_geometry(nestsuccess.covs) %>%
-  dplyr::select(ag_foc1, dev_fc4, shrub_f2, hrb_fc4, BA_foc4,
+  dplyr::select(ag_foc2, dev_fc4, shrub_f2, hrb_fc4, BA_foc4,
                 HT_foc1, SW_foc1, D2Edg_2, D2Rd_f2, D2Rp_f3))
 
 #Z - Scale
@@ -289,8 +289,8 @@ for(i in 1:10){
 #HDSR
 scaleresults %>% filter(Component == "HDSR")
 cov_HDSR <- as.matrix(st_drop_geometry(nestsuccess.covs) %>%
-                        dplyr::select(ag_foc2, dev_fc4, shrub_f2, hrb_fc4, BA_foc4,
-                                      HT_foc1, SW_foc1, D2Edg_2, D2Rd_f2, D2Rp_f3))
+                        dplyr::select(ag_foc2, dev_fc3, shrub_f4, hrb_fc3, BA_foc1,
+                                      HT_foc1, SW_foc4, D2Edg_4, D2Rd_f3, D2Rp_f3))
 #Z - Scale
 for(i in 1:10){
   cov_HDSR[,i] <- scale(cov_HDSR[,i], center = TRUE, scale = TRUE)

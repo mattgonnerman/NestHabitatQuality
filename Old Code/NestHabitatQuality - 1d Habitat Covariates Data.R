@@ -369,7 +369,7 @@ pl.vhf.used <- st_read("./GIS/C_PLSUsedVHF.shp") %>%
   mutate(Used = 1) %>%
   mutate(GPS = 0) %>%
   dplyr::select(NestID, Used, GPS)
-pl.vhf.avail <- st_read("./GIS/C_PLSAvailVHF.shp")%>%
+pl.vhf.avail <- st_read("./GIS/C1_PLSAvailVHF.shp")%>%
   mutate(Used = 0) %>%
   mutate(GPS = 0) %>%
   dplyr::select(NestID, Used, GPS)
@@ -377,7 +377,7 @@ pl.gps.used <- st_read("./GIS/prelaying.gps.used.points.shp")%>%
   mutate(Used = 1) %>%
   mutate(GPS = 1) %>%
   dplyr::select(-timestamp)
-pl.gps.avail <- st_read("./GIS/C_PLSAvailGPS.shp")%>%
+pl.gps.avail <- st_read("./GIS/C1_PLSAvailGPS.shp")%>%
   mutate(Used = 0) %>%
   mutate(GPS = 1) %>%
   dplyr::select(NestID, Used, GPS)
@@ -408,7 +408,7 @@ lay.vhf.used <- st_read("./GIS/C_LSUsedVHF.shp") %>%
   mutate(Used = 1) %>%
   mutate(GPS = 0) %>%
   dplyr::select(NestID, Used, GPS)
-lay.vhf.avail <- st_read("./GIS/C_LSAvailVHF.shp")%>%
+lay.vhf.avail <- st_read("./GIS/C1_LSAvailVHF.shp")%>%
   mutate(Used = 0) %>%
   mutate(GPS = 0) %>%
   dplyr::select(NestID, Used, GPS)
@@ -416,7 +416,7 @@ lay.gps.used <- st_read("./GIS/laying.gps.used.points.shp")%>%
   mutate(Used = 1) %>%
   mutate(GPS = 1) %>%
   dplyr::select(-timestamp)
-lay.gps.avail <- st_read("./GIS/C_LSAvailGPS.shp")%>%
+lay.gps.avail <- st_read("./GIS/C1_LSAvailGPS.shp")%>%
   mutate(Used = 0) %>%
   mutate(GPS = 1) %>%
   dplyr::select(NestID, Used, GPS)
