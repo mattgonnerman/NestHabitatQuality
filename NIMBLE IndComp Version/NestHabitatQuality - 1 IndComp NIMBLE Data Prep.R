@@ -6,6 +6,8 @@ memory.limit(56000)
 #Weight for RSF infinitely weighted logistic regression
 w <- 10000
 
+`%notin%` <- Negate(`%in%`)
+
 ########################
 ### DATA PREPARATION ###
 ########################
@@ -45,9 +47,13 @@ pl.df <- st_drop_geometry(rbind(pl.used, pl.avail)) %>%
   ungroup()
 
 # Matrix designating Used (1) or Available (0)
-y_PL <- as.matrix(pl.df %>% dplyr::select(MatchID, Used) %>%
+y_PL <- pl.df %>% dplyr::select(MatchID, Used) %>%
                   group_by(MatchID) %>% mutate(Number = row_number()) %>%
-                  dcast(MatchID ~ Number, value.var = "Used") %>%
+                  dcast(MatchID ~ Number, value.var = "Used")
+PL_NAs <- which(!complete.cases(y_PL))
+
+pl.df <- pl.df %>% filter(MatchID %notin% y_PL$MatchID[PL_NAs])
+y_PL <- as.matrix(y_PL[-PL_NAs,] %>%
                   dplyr::select(-MatchID))
 
 #Weights for Infinitely Weighted logistic regression
@@ -107,6 +113,8 @@ y_L <- as.matrix(l.df %>% dplyr::select(MatchID, Used) %>%
                     group_by(MatchID) %>% mutate(Number = row_number()) %>%
                     dcast(MatchID ~ Number, value.var = "Used") %>%
                     dplyr::select(-MatchID))
+
+L_NAs <- which(!complete.cases(y_PL))
 
 #Weights for Infinitely Weighted logistic regression
 weightsL <- ifelse(y_L == "0", w, ifelse(y_L == 1, 1, NA))
@@ -174,7 +182,7 @@ NInd_NSel <- nrow(y_N)
 
 ##################################################################################
 ### Nest Success
-source(file = "NestHabitatQuality - 1b Nest Success Data.R")
+source(file = "./Old Code/NestHabitatQuality - 1b Nest Success Data.R")
 NDSR_order <- ns_eh_matrix$NestID
 
 nestsuccess.covs <- st_read("./GIS/NestSuccess_Covs.shp") %>%
