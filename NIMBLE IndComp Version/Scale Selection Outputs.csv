@@ -14,58 +14,58 @@
 "LSel","shrub_","beta_SC_LSel",10000,NA,NA,NA,1
 "LSel","hrb_","beta_SC_LSel",10000,NA,NA,NA,1
 "LSel","BA_","beta_SC_LSel",10000,NA,NA,NA,1
-"LSel","HT_","beta_SC_LSel",10000,NA,NA,NA,1
+"LSel","HT_","beta_SC_LSel",1,9999,NA,NA,2
 "LSel","SW_","beta_SC_LSel",10000,NA,NA,NA,1
 "LSel","D2Edg_","beta_SC_LSel",10000,NA,NA,NA,1
-"LSel","D2Rd_","beta_SC_LSel",2352,1,13,7634,4
-"LSel","D2Rp_","beta_SC_LSel",2643,4,5933,1420,3
-"NSel","ag_","beta_SC_NSel",1635,1692,1740,4933,4
-"NSel","dev_","beta_SC_NSel",2927,3183,2557,1333,2
-"NSel","shrub_","beta_SC_NSel",2560,3420,2287,1733,2
-"NSel","hrb_","beta_SC_NSel",1296,1136,1412,6156,4
-"NSel","BA_","beta_SC_NSel",6541,1046,508,1905,1
-"NSel","HT_","beta_SC_NSel",4187,2065,1080,2668,1
-"NSel","SW_","beta_SC_NSel",1684,1772,1707,4837,4
-"NSel","D2Edg_","beta_SC_NSel",290,174,147,9389,4
-"NSel","D2Rd_","beta_SC_NSel",2779,2639,2362,2220,1
-"NSel","D2Rp_","beta_SC_NSel",2370,2426,2633,2571,3
-"NDSR","ag_","HDSR(rows) by NDSR(columns)",620,1315,161,425,NA
-"NDSR","ag_","HDSR(rows) by NDSR(columns)",576,1279,179,434,NA
-"NDSR","ag_","HDSR(rows) by NDSR(columns)",663,1255,158,453,NA
-"NDSR","ag_","HDSR(rows) by NDSR(columns)",632,1260,149,441,NA
-"NDSR","dev_","HDSR(rows) by NDSR(columns)",149,136,197,1999,NA
-"NDSR","dev_","HDSR(rows) by NDSR(columns)",137,150,207,1984,NA
-"NDSR","dev_","HDSR(rows) by NDSR(columns)",145,155,182,2103,NA
-"NDSR","dev_","HDSR(rows) by NDSR(columns)",140,143,194,1979,NA
-"NDSR","shrub_","HDSR(rows) by NDSR(columns)",578,1574,167,74,NA
-"NDSR","shrub_","HDSR(rows) by NDSR(columns)",579,1617,163,99,NA
-"NDSR","shrub_","HDSR(rows) by NDSR(columns)",560,1745,162,98,NA
-"NDSR","shrub_","HDSR(rows) by NDSR(columns)",588,1722,169,105,NA
-"NDSR","hrb_","HDSR(rows) by NDSR(columns)",178,62,130,2105,NA
-"NDSR","hrb_","HDSR(rows) by NDSR(columns)",179,57,122,2184,NA
-"NDSR","hrb_","HDSR(rows) by NDSR(columns)",167,52,101,2076,NA
-"NDSR","hrb_","HDSR(rows) by NDSR(columns)",183,71,108,2225,NA
-"NDSR","BA_","HDSR(rows) by NDSR(columns)",514,483,612,850,NA
-"NDSR","BA_","HDSR(rows) by NDSR(columns)",531,519,604,862,NA
-"NDSR","BA_","HDSR(rows) by NDSR(columns)",557,521,650,820,NA
-"NDSR","BA_","HDSR(rows) by NDSR(columns)",543,484,634,816,NA
-"NDSR","HT_","HDSR(rows) by NDSR(columns)",678,579,574,678,NA
-"NDSR","HT_","HDSR(rows) by NDSR(columns)",729,562,577,653,NA
-"NDSR","HT_","HDSR(rows) by NDSR(columns)",750,548,576,602,NA
-"NDSR","HT_","HDSR(rows) by NDSR(columns)",708,570,557,659,NA
-"NDSR","SW_","HDSR(rows) by NDSR(columns)",1005,606,425,473,NA
-"NDSR","SW_","HDSR(rows) by NDSR(columns)",942,601,413,499,NA
-"NDSR","SW_","HDSR(rows) by NDSR(columns)",1012,638,456,475,NA
-"NDSR","SW_","HDSR(rows) by NDSR(columns)",966,607,406,476,NA
-"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",572,1121,376,423,NA
-"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",552,1123,371,427,NA
-"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",540,1154,397,441,NA
-"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",530,1167,358,448,NA
-"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",657,1062,550,330,NA
-"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",608,1043,511,303,NA
-"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",612,969,536,328,NA
-"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",660,1066,484,281,NA
-"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",45,762,1349,271,NA
-"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",45,771,1391,302,NA
-"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",48,794,1387,303,NA
-"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",31,789,1411,301,NA
+"LSel","D2Rd_","beta_SC_LSel",523,1100,4430,3947,3
+"LSel","D2Rp_","beta_SC_LSel",10000,NA,NA,NA,1
+"NSel","ag_","beta_SC_NSel",3642,3236,1428,1694,1
+"NSel","dev_","beta_SC_NSel",4679,3350,1322,649,1
+"NSel","shrub_","beta_SC_NSel",7177,1538,781,504,1
+"NSel","hrb_","beta_SC_NSel",1110,247,161,8482,4
+"NSel","BA_","beta_SC_NSel",5608,2073,1220,1099,1
+"NSel","HT_","beta_SC_NSel",4514,2114,2940,432,1
+"NSel","SW_","beta_SC_NSel",7847,1333,468,352,1
+"NSel","D2Edg_","beta_SC_NSel",401,194,85,9320,4
+"NSel","D2Rd_","beta_SC_NSel",3100,2419,2114,2367,1
+"NSel","D2Rp_","beta_SC_NSel",2365,6337,766,532,2
+"NDSR","ag_","HDSR(rows) by NDSR(columns)",531,1198,165,585,NA
+"NDSR","ag_","HDSR(rows) by NDSR(columns)",599,1307,157,561,NA
+"NDSR","ag_","HDSR(rows) by NDSR(columns)",578,1137,161,518,NA
+"NDSR","ag_","HDSR(rows) by NDSR(columns)",587,1207,173,536,NA
+"NDSR","dev_","HDSR(rows) by NDSR(columns)",167,169,224,1912,NA
+"NDSR","dev_","HDSR(rows) by NDSR(columns)",152,164,201,1953,NA
+"NDSR","dev_","HDSR(rows) by NDSR(columns)",170,203,197,1994,NA
+"NDSR","dev_","HDSR(rows) by NDSR(columns)",171,201,168,1954,NA
+"NDSR","shrub_","HDSR(rows) by NDSR(columns)",606,1636,160,111,NA
+"NDSR","shrub_","HDSR(rows) by NDSR(columns)",594,1655,160,107,NA
+"NDSR","shrub_","HDSR(rows) by NDSR(columns)",582,1602,151,105,NA
+"NDSR","shrub_","HDSR(rows) by NDSR(columns)",593,1660,161,117,NA
+"NDSR","hrb_","HDSR(rows) by NDSR(columns)",54,27,30,2333,NA
+"NDSR","hrb_","HDSR(rows) by NDSR(columns)",62,18,38,2339,NA
+"NDSR","hrb_","HDSR(rows) by NDSR(columns)",51,19,31,2490,NA
+"NDSR","hrb_","HDSR(rows) by NDSR(columns)",51,15,25,2417,NA
+"NDSR","BA_","HDSR(rows) by NDSR(columns)",510,464,689,895,NA
+"NDSR","BA_","HDSR(rows) by NDSR(columns)",473,511,634,826,NA
+"NDSR","BA_","HDSR(rows) by NDSR(columns)",540,491,629,858,NA
+"NDSR","BA_","HDSR(rows) by NDSR(columns)",549,502,615,814,NA
+"NDSR","HT_","HDSR(rows) by NDSR(columns)",759,573,541,705,NA
+"NDSR","HT_","HDSR(rows) by NDSR(columns)",733,585,537,661,NA
+"NDSR","HT_","HDSR(rows) by NDSR(columns)",701,595,537,634,NA
+"NDSR","HT_","HDSR(rows) by NDSR(columns)",719,568,511,641,NA
+"NDSR","SW_","HDSR(rows) by NDSR(columns)",976,587,411,483,NA
+"NDSR","SW_","HDSR(rows) by NDSR(columns)",927,552,403,540,NA
+"NDSR","SW_","HDSR(rows) by NDSR(columns)",967,606,434,541,NA
+"NDSR","SW_","HDSR(rows) by NDSR(columns)",982,583,434,574,NA
+"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",533,1155,371,451,NA
+"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",536,1164,383,406,NA
+"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",559,1144,384,389,NA
+"NDSR","D2Edg_","HDSR(rows) by NDSR(columns)",525,1186,386,428,NA
+"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",652,1112,453,274,NA
+"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",620,1082,490,297,NA
+"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",618,1171,480,294,NA
+"NDSR","D2Rd_","HDSR(rows) by NDSR(columns)",577,1114,485,281,NA
+"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",45,760,1427,291,NA
+"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",56,715,1377,313,NA
+"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",57,780,1393,307,NA
+"NDSR","D2Rp_","HDSR(rows) by NDSR(columns)",48,724,1407,300,NA
