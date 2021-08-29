@@ -9,6 +9,8 @@ memory.limit(56000)
 #Weight for RSF infinitely weighted logistic regression
 w <- 10000
 
+`%notin%` <- Negate(`%in%`)
+
 ########################
 ### DATA PREPARATION ###
 ########################
@@ -48,9 +50,17 @@ pl.df <- st_drop_geometry(rbind(pl.used, pl.avail)) %>%
   ungroup()
 
 # Matrix designating Used (1) or Available (0)
-y_PL <- as.matrix(pl.df %>% dplyr::select(MatchID, Used) %>%
-                    group_by(MatchID) %>% mutate(Number = row_number()) %>%
-                    dcast(MatchID ~ Number, value.var = "Used") %>%
+# y_PL <- as.matrix(pl.df %>% dplyr::select(MatchID, Used) %>%
+#                     group_by(MatchID) %>% mutate(Number = row_number()) %>%
+#                     dcast(MatchID ~ Number, value.var = "Used") %>%
+#                     dplyr::select(-MatchID))
+y_PL <- pl.df %>% dplyr::select(MatchID, Used) %>%
+  group_by(MatchID) %>% mutate(Number = row_number()) %>%
+  dcast(MatchID ~ Number, value.var = "Used")
+PL_NAs <- which(!complete.cases(y_PL))
+
+pl.df <- pl.df %>% filter(MatchID %notin% y_PL$MatchID[PL_NAs])
+y_PL <- as.matrix(y_PL[-PL_NAs,] %>%
                     dplyr::select(-MatchID))
 
 #Weights for Infinitely Weighted logistic regression
@@ -298,8 +308,8 @@ for(i in 1:10){
 
 ##################################################################################
 ### NHQ Inputs
-# NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
-NHQ.covs <- st_read("./GIS/NHQ_covs_90m.shp")
+NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
+# NHQ.covs <- st_read("./GIS/NHQ_covs_90m.shp")
 NHQ.covs <- st_transform(NHQ.covs, 32619)
 
 nNHQ <- nrow(NHQ.covs)

@@ -43,5 +43,5 @@ NHQ.samples.MCMC <- runMCMC(NHQ.comp.MCMC,
                             summary = T,
                             samples = F)
 
-write.csv(NHQ.samples.MCMC, "./Final/Final Model Summary 90m.csv")
+write.csv(NHQ.samples.MCMC, "./Final/Final Model Summary.csv")
 
