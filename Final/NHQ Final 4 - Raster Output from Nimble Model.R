@@ -34,11 +34,11 @@ NHQ.raster.lcl <- rasterize(st_coordinates(NHQpointslcl)[,1:2], NHQ.raster, fiel
 NHQ.raster.ucl <- rasterize(st_coordinates(NHQpointsucl)[,1:2], NHQ.raster, field = NHQpointsucl$FinalNHQUCL)
 NHQ.raster.range <- rasterize(st_coordinates(NHQpointsrange)[,1:2], NHQ.raster, field = NHQpointsrange$FinalNHQRange)
 
-writeRaster(NHQ.raster.mean, filename = "./Final/NHQ_Mean.tif", format = "GTiff")
-writeRaster(NHQ.raster.med, filename = "./Final/NHQ_Med.tif", format = "GTiff")
-writeRaster(NHQ.raster.lcl, filename = "./Final/NHQ_LCL.tif", format = "GTiff")
-writeRaster(NHQ.raster.ucl, filename = "./Final/NHQ_UCL.tif", format = "GTiff")
-writeRaster(NHQ.raster.range, filename = "./Final/NHQ_Range.tif", format = "GTiff")
+writeRaster(NHQ.raster.mean, filename = "./Final/NHQ_500m_Mean.tif", format = "GTiff")
+writeRaster(NHQ.raster.med, filename = "./Final/NHQ_500m_Med.tif", format = "GTiff")
+writeRaster(NHQ.raster.lcl, filename = "./Final/NHQ_500m_LCL.tif", format = "GTiff")
+writeRaster(NHQ.raster.ucl, filename = "./Final/NHQ_500m_UCL.tif", format = "GTiff")
+writeRaster(NHQ.raster.range, filename = "./Final/NHQ_500m_Range.tif", format = "GTiff")
 
 
 

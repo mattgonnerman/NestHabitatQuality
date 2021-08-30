@@ -31,13 +31,19 @@ coef.comp.plot <- ggplot(data = coef.results, aes(y = Covariate, x = Mean,
                                  "Laying\nHabitat\nSelection",
                                  "Nest Site\nSelection",
                                  "Nest\nFailure"),
-                      values = c("#C4961A", "#D16103", "#52854C", "#293352")) +   
+                      values = c("#C4961A", 
+                                 "#D16103", 
+                                 "#52854C",
+                                 "#293352")) +   
   scale_shape_manual(name = "Model\nComponent",
                      labels = c("Prelaying\nHabitat\nSelection",
                                 "Laying\nHabitat\nSelection",
                                 "Nest Site\nSelection",
                                 "Nest\nFailure"),
-                     values = c(15, 19, 17, 18))
+                     values = c(15, 
+                                19, 
+                                17,
+                                18))
 
 
 ggsave(coef.comp.plot, file = "./Figures/Fig5 - Coefficient Comparisons.jpg",

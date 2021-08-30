@@ -1,53 +1,53 @@
-ModelObject,ModelName,Covariate,Scale,Mean,Median,SD,LCL,UCL,CompOrder,CovOrder
-beta_SC_PLSel[1],Prelaying Habitat Selection,Agriculture,3,0.232679202,0.232724714,0.011723776,0.210155118,0.256255505,1,1
-beta_SC_PLSel[2],Prelaying Habitat Selection,Developed,1,-0.05421412,-0.054476906,0.020542582,-0.094761808,-0.014234964,1,2
-beta_SC_PLSel[3],Prelaying Habitat Selection,Shrub,1,-0.533675668,-0.533641334,0.022318476,-0.577399406,-0.487887695,1,3
-beta_SC_PLSel[4],Prelaying Habitat Selection,Herbaceous,1,0.606349445,0.606238319,0.016112146,0.576018735,0.638269173,1,4
-beta_SC_PLSel[5],Prelaying Habitat Selection,Basal Area,1,-0.110169767,-0.114015263,0.040689019,-0.183805296,-0.024133086,1,5
-beta_SC_PLSel[6],Prelaying Habitat Selection,Mean Tree Height,1,-0.886159064,-0.879497183,0.069341141,-1.032082655,-0.761460916,1,6
-beta_SC_PLSel[7],Prelaying Habitat Selection,Percent Softwood,1,-0.592144918,-0.589037802,0.047135715,-0.692209485,-0.503148593,1,7
-beta_SC_PLSel[8],Prelaying Habitat Selection,Distance to Forest Edge,2,-0.134814694,-0.135548345,0.015116068,-0.163162524,-0.105014344,1,8
-beta_SC_PLSel[9],Prelaying Habitat Selection,Distance to Road,1,0.699682339,0.699810979,0.01556021,0.667448091,0.730643916,1,9
-beta_SC_PLSel[10],Prelaying Habitat Selection,Distance to Riparian,2,-0.433594425,-0.433542805,0.012604927,-0.457535148,-0.40893734,1,10
-beta_SC_LSel[1],Laying Habitat Selection,Agriculture,1,0.1570674,0.157153464,0.022544784,0.11590392,0.201308441,2,1
-beta_SC_LSel[2],Laying Habitat Selection,Developed,4,0.036545755,0.036501849,0.008363827,0.019374663,0.052990369,2,2
-beta_SC_LSel[3],Laying Habitat Selection,Shrub,4,0.045832551,0.045826394,0.006687423,0.033312214,0.059452675,2,3
-beta_SC_LSel[4],Laying Habitat Selection,Herbaceous,1,0.202389777,0.202301447,0.020900441,0.161604096,0.244447456,2,4
-beta_SC_LSel[5],Laying Habitat Selection,Basal Area,1,0.0096927,0.010065001,0.032447819,-0.05374429,0.071996108,2,5
-beta_SC_LSel[6],Laying Habitat Selection,Mean Tree Height,1,-0.382396108,-0.383853446,0.041676326,-0.459336327,-0.296029423,2,6
-beta_SC_LSel[7],Laying Habitat Selection,Percent Softwood,3,-0.201003819,-0.201109084,0.018775915,-0.237195304,-0.163721478,2,7
-beta_SC_LSel[8],Laying Habitat Selection,Distance to Forest Edge,2,-0.233084601,-0.233588251,0.020034069,-0.271416628,-0.194825848,2,8
-beta_SC_LSel[9],Laying Habitat Selection,Distance to Road,4,-0.093803081,-0.094186608,0.019796763,-0.132050815,-0.054672498,2,9
-beta_SC_LSel[10],Laying Habitat Selection,Distance to Riparian,3,-0.002583347,-0.002530305,0.014945674,-0.03122459,0.026561802,2,10
-beta_SC_NSel[1],Nest Site Selection,Agriculture,4,-0.252770274,-0.242623515,0.187067731,-0.637408506,0.079242545,3,1
-beta_SC_NSel[2],Nest Site Selection,Developed,2,1.28896521,1.281126314,0.14613913,1.012128014,1.596780771,3,2
-beta_SC_NSel[3],Nest Site Selection,Shrub,2,-1.729508812,-1.723046209,0.418027383,-2.60730857,-0.953279231,3,3
-beta_SC_NSel[4],Nest Site Selection,Herbaceous,4,-0.122604227,-0.111400352,0.219772548,-0.59325758,0.289397704,3,4
-beta_SC_NSel[5],Nest Site Selection,Basal Area,1,-1.650547747,-1.643886924,0.274048559,-2.197525934,-1.143575786,3,5
-beta_SC_NSel[6],Nest Site Selection,Mean Tree Height,1,-1.111996416,-1.092763135,0.258262395,-1.635349965,-0.639873603,3,6
-beta_SC_NSel[7],Nest Site Selection,Percent Softwood,4,0.217657954,0.218961083,0.12739251,-0.02519709,0.462084534,3,7
-beta_SC_NSel[8],Nest Site Selection,Distance to Forest Edge,4,0.084601991,0.090301386,0.160404677,-0.221619407,0.397270698,3,8
-beta_SC_NSel[9],Nest Site Selection,Distance to Road,1,0.514868649,0.517316557,0.131062542,0.251488912,0.760627879,3,9
-beta_SC_NSel[10],Nest Site Selection,Distance to Riparian,3,-0.258327446,-0.253992063,0.162631516,-0.586733631,0.067916264,3,10
-intercept_HDSR,Hen Survival,NA,NA,-26.41273539,-24.74831205,7.095926567,-44.24288323,-15.98403156,4,0
-beta_SC_NDSR[1],Nest Failure,Agriculture,1,-0.171246475,-0.170466544,0.165974249,-0.509715929,0.133294843,4,1
-beta_SC_NDSR[2],Nest Failure,Developed,4,0.06042527,0.064278959,0.106469426,-0.158074154,0.262336163,4,2
-beta_SC_NDSR[3],Nest Failure,Shrub,2,-0.018918996,-0.011163382,0.117537331,-0.259046276,0.199937888,4,3
-beta_SC_NDSR[4],Nest Failure,Herbaceous,4,0.034356041,0.042464082,0.117439773,-0.208200775,0.250527972,4,4
-beta_SC_NDSR[5],Nest Failure,Basal Area,4,-0.068763124,-0.065028913,0.121549766,-0.321996896,0.168415926,4,5
-beta_SC_NDSR[6],Nest Failure,Mean Tree Height,1,-0.044955845,-0.039799325,0.201961219,-0.450135915,0.356243946,4,6
-beta_SC_NDSR[7],Nest Failure,Percent Softwood,1,-0.011122728,-0.011787028,0.245444006,-0.504340597,0.458417829,4,7
-beta_SC_NDSR[8],Nest Failure,Distance to Forest Edge,2,0.101835985,0.101274332,0.184561081,-0.270078606,0.470978089,4,8
-beta_SC_NDSR[9],Nest Failure,Distance to Road,2,-0.15110699,-0.14351002,0.154306233,-0.487420145,0.126636242,4,9
-beta_SC_NDSR[10],Nest Failure,Distance to Riparian,3,-0.221828459,-0.209760732,0.154861666,-0.535790034,0.047638943,4,10
-intercept_NDSR,Nest Failure,NA,NA,-3.775206955,-3.773187458,0.113356647,-4.000611039,-3.565440484,5,0
-beta_SC_HDSR[1],Hen Survival,Agriculture,2,-0.034553372,-0.04453789,0.550324443,-1.128323518,1.080785378,5,1
-beta_SC_HDSR[2],Hen Survival,Developed,4,-4.387856508,-3.461156529,3.563586888,-12.97327219,0.041064696,5,2
-beta_SC_HDSR[3],Hen Survival,Shrub,2,-4.690999213,-4.296706445,3.457616849,-12.84966548,0.380298436,5,3
-beta_SC_HDSR[4],Hen Survival,Herbaceous,4,-42.26627955,-37.04347933,22.31997171,-102.5042103,-11.59244014,5,4
-beta_SC_HDSR[5],Hen Survival,Basal Area,4,0.324952013,0.319217363,0.47369922,-0.588454164,1.329988778,5,5
-beta_SC_HDSR[6],Hen Survival,Mean Tree Height,1,-0.495826719,-0.469357883,1.155769655,-2.781783286,1.717373139,5,6
-beta_SC_HDSR[7],Hen Survival,Percent Softwood,1,-0.452534119,-0.417198211,1.802936928,-4.264310776,2.989531172,5,7
-beta_SC_HDSR[8],Hen Survival,Distance to Forest Edge,2,-1.087892683,-1.00077554,1.090191089,-3.543404931,0.746674904,5,8
-beta_SC_HDSR[9],Hen Survival,Distance to Road,2,-3.581501942,-3.11011577,4.254603701,-14.07968147,2.610315376,5,9
-beta_SC_HDSR[10],Hen Survival,Distance to Riparian,3,-2.482191624,-2.174049084,1.828698567,-6.824864628,0.160188848,5,10
+ ,ModelName,Covariate,Scale,Mean,Median,SD,LCL,UCL,CompOrder,CovOrder
+intercept_HDSR,Hen Survival,NA,NA,-10.220,-9.771,2.126,-16.080,-7.386,5,0
+beta_SC_HDSR[9],Hen Survival,Distance to Road,3,-3.620,-2.747,3.201,-12.338,0.341,5,9
+beta_SC_HDSR[10],Hen Survival,Distance to Riparian,3,-2.733,-2.320,2.090,-8.038,0.157,5,10
+beta_SC_HDSR[6],Hen Survival,Mean Tree Height,1,-0.625,-0.463,0.965,-2.903,0.838,5,6
+beta_SC_HDSR[3],Hen Survival,Shrub,4,-0.315,-0.194,0.536,-1.731,0.375,5,3
+beta_SC_HDSR[8],Hen Survival,Distance to Forest Edge,4,-0.118,-0.037,0.667,-1.604,1.014,5,8
+beta_SC_HDSR[2],Hen Survival,Developed,3,-0.007,0.074,0.720,-1.742,1.165,5,2
+beta_SC_HDSR[4],Hen Survival,Herbaceous,3,0.004,0.114,1.237,-2.729,2.029,5,4
+beta_SC_HDSR[1],Hen Survival,Agriculture,2,0.550,0.569,0.482,-0.405,1.492,5,1
+beta_SC_HDSR[5],Hen Survival,Basal Area,1,0.951,0.877,0.958,-0.713,3.005,5,5
+beta_SC_HDSR[7],Hen Survival,Percent Softwood,4,0.981,0.955,0.708,-0.300,2.522,5,7
+beta_SC_LSel[7],Laying Habitat Selection,Percent Softwood,2,-0.398,-0.399,0.042,-0.480,-0.316,2,7
+beta_SC_LSel[10],Laying Habitat Selection,Distance to Riparian,1,-0.354,-0.353,0.068,-0.485,-0.223,2,10
+beta_SC_LSel[9],Laying Habitat Selection,Distance to Road,3,-0.340,-0.339,0.047,-0.433,-0.251,2,9
+beta_SC_LSel[2],Laying Habitat Selection,Developed,3,-0.164,-0.163,0.019,-0.199,-0.126,2,2
+beta_SC_LSel[8],Laying Habitat Selection,Distance to Forest Edge,4,-0.102,-0.102,0.010,-0.122,-0.082,2,8
+beta_SC_LSel[4],Laying Habitat Selection,Herbaceous,4,0.076,0.076,0.008,0.062,0.091,2,4
+beta_SC_LSel[6],Laying Habitat Selection,Mean Tree Height,3,0.128,0.128,0.021,0.088,0.168,2,6
+beta_SC_LSel[1],Laying Habitat Selection,Agriculture,3,0.160,0.160,0.016,0.130,0.192,2,1
+beta_SC_LSel[5],Laying Habitat Selection,Basal Area,1,0.562,0.564,0.079,0.404,0.719,2,5
+beta_SC_LSel[3],Laying Habitat Selection,Shrub,1,0.986,0.985,0.083,0.824,1.147,2,3
+intercept_NDSR,Nest Failure,NA,NA,-3.777,-3.775,0.119,-4.016,-3.560,4,0
+beta_SC_NDSR[10],Nest Failure,Distance to Riparian,3,-0.207,-0.198,0.153,-0.527,0.070,4,10
+beta_SC_NDSR[1],Nest Failure,Agriculture,2,-0.155,-0.151,0.170,-0.494,0.168,4,1
+beta_SC_NDSR[9],Nest Failure,Distance to Road,2,-0.148,-0.136,0.154,-0.478,0.145,4,9
+beta_SC_NDSR[5],Nest Failure,Basal Area,4,-0.075,-0.075,0.120,-0.322,0.146,4,5
+beta_SC_NDSR[6],Nest Failure,Mean Tree Height,1,-0.017,-0.018,0.203,-0.417,0.375,4,6
+beta_SC_NDSR[3],Nest Failure,Shrub,2,-0.008,-0.002,0.117,-0.262,0.199,4,3
+beta_SC_NDSR[7],Nest Failure,Percent Softwood,1,0.027,0.024,0.255,-0.457,0.535,4,7
+beta_SC_NDSR[4],Nest Failure,Herbaceous,4,0.031,0.029,0.120,-0.215,0.253,4,4
+beta_SC_NDSR[2],Nest Failure,Developed,4,0.063,0.067,0.110,-0.155,0.277,4,2
+beta_SC_NDSR[8],Nest Failure,Distance to Forest Edge,2,0.081,0.092,0.188,-0.291,0.432,4,8
+beta_SC_NSel[4],Nest Site Selection,Herbaceous,4,-0.079,-0.077,0.122,-0.326,0.159,3,4
+beta_SC_NSel[1],Nest Site Selection,Agriculture,1,-0.063,-0.061,0.110,-0.277,0.159,3,1
+beta_SC_NSel[7],Nest Site Selection,Percent Softwood,1,-0.032,-0.032,0.116,-0.260,0.186,3,7
+beta_SC_NSel[6],Nest Site Selection,Mean Tree Height,1,-0.019,-0.015,0.112,-0.249,0.195,3,6
+beta_SC_NSel[3],Nest Site Selection,Shrub,1,0.001,-0.001,0.118,-0.232,0.226,3,3
+beta_SC_NSel[10],Nest Site Selection,Distance to Riparian,2,0.008,0.014,0.124,-0.234,0.240,3,10
+beta_SC_NSel[9],Nest Site Selection,Distance to Road,1,0.009,0.015,0.114,-0.221,0.227,3,9
+beta_SC_NSel[5],Nest Site Selection,Basal Area,1,0.009,0.016,0.113,-0.221,0.217,3,5
+beta_SC_NSel[2],Nest Site Selection,Developed,1,0.038,0.039,0.116,-0.188,0.259,3,2
+beta_SC_NSel[8],Nest Site Selection,Distance to Forest Edge,4,0.103,0.105,0.113,-0.119,0.326,3,8
+beta_SC_PLSel[10],Prelaying Habitat Selection,Distance to Riparian,1,-0.696,-0.696,0.036,-0.766,-0.625,1,10
+beta_SC_PLSel[6],Prelaying Habitat Selection,Mean Tree Height,1,-0.661,-0.652,0.163,-0.969,-0.367,1,6
+beta_SC_PLSel[8],Prelaying Habitat Selection,Distance to Forest Edge,2,-0.099,-0.099,0.018,-0.133,-0.064,1,8
+beta_SC_PLSel[1],Prelaying Habitat Selection,Agriculture,4,0.068,0.067,0.007,0.054,0.082,1,1
+beta_SC_PLSel[2],Prelaying Habitat Selection,Developed,1,0.172,0.170,0.045,0.086,0.259,1,2
+beta_SC_PLSel[5],Prelaying Habitat Selection,Basal Area,1,0.393,0.387,0.099,0.217,0.585,1,5
+beta_SC_PLSel[3],Prelaying Habitat Selection,Shrub,1,0.456,0.455,0.039,0.379,0.534,1,3
+beta_SC_PLSel[4],Prelaying Habitat Selection,Herbaceous,1,0.657,0.657,0.024,0.611,0.707,1,4
+beta_SC_PLSel[7],Prelaying Habitat Selection,Percent Softwood,1,1.020,1.021,0.094,0.844,1.206,1,7
+beta_SC_PLSel[9],Prelaying Habitat Selection,Distance to Road,1,1.243,1.243,0.036,1.175,1.311,1,9
