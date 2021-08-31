@@ -200,13 +200,39 @@ state.merge <- st_union(statepoly)
 
 
 ### NLCD
-NLCD <- raster("E:/Maine Drive/GIS/NLCD_2016_Land_Cover_L48_20190424/NLCD_2016_Land_Cover_L48_20190424.img")
+NLCD <- raster("./GIS/NLCD_clipped.tif")
 NLCD.adj <- projectRaster(NHQ.raster, crs = crs(NLCD))
 NLCD.crop <- crop(NLCD, NLCD.adj)
-NLCD.crop <-  projectRaster(NLCD.crop, NHQ.raster)
+NLCD.crop <-  projectRaster(NLCD.crop, NHQ.raster, method = "ngb")
 nlcd.df <- as.data.frame(xyFromCell(NLCD.crop, 1:ncell(NLCD.crop))) %>%
   rename(lon = x, lat = y)
 nlcd.df$Cat <- getValues(NLCD.crop)
+nlcd.df <- nlcd.df %>%
+  mutate(Cat = ifelse(Cat %in% 21:24, "Developed", 
+                      ifelse(Cat %in% 41:43, "Forested", 
+                             ifelse(Cat == 11, "Water",
+                                    ifelse(Cat == 71, "Herbaceous", 
+                                           ifelse(Cat == 52, "Shrub", 
+                                                  ifelse(Cat %in% 81:82, "Agriculture", "Other")))))))
+### Percent Softwood
+SW.rast <- raster("./GIS/SW_Percent_19.tif")
+SW.adj <- projectRaster(NHQ.raster, crs = crs(SW.rast))
+SW.crop <- crop(SW.rast, SW.adj)
+SW.crop <-  projectRaster(SW.crop, NHQ.raster, method = "ngb")
+sw.df <- as.data.frame(xyFromCell(SW.crop, 1:ncell(SW.crop))) %>%
+  rename(lon = x, lat = y)
+sw.df$Value <- getValues(SW.crop)
+sw.df$Value[is.na(sw.df$Value)] <- 0
+
+### Mean Tree Height
+HT.rast <- raster("./GIS/HT_Mean_19.tif")
+HT.adj <- projectRaster(NHQ.raster, crs = crs(HT.rast))
+HT.crop <- crop(HT.rast, HT.adj)
+HT.crop <-  projectRaster(HT.crop, NHQ.raster, method = "ngb")
+HT.df <- as.data.frame(xyFromCell(HT.crop, 1:ncell(HT.crop))) %>%
+  rename(lon = x, lat = y)
+HT.df$Value <- getValues(HT.crop)
+HT.df$Value[is.na(HT.df$Value)] <- 0
 
 ### Nest Locations
 nestsites <- st_read("./GIS/NestSuccess_Covs_Z.shp") %>%
@@ -243,6 +269,13 @@ capsites.trans <- merge(capsites.sf, trap.raw, by = "CapLoc", all.y = T) %>%
 capsites.trans$lon <- st_coordinates(capsites.trans)[,1]
 capsites.trans$lat <- st_coordinates(capsites.trans)[,2]
 
+#Roads
+roads.sf <- st_read("E:/Maine Drive/GIS/Roads/medotpubrds.shp")
+roads.sf <- st_transform(roads.sf, 4326)
+roads.sf <- st_zm(roads.sf)
+roads.sf <- st_crop(roads.sf, nestcrop)
+roads.sf <- st_combine(roads.sf)
+
 #################################################
 ### Map of Study Area depicting NHQ estimates ###
 #################################################
@@ -250,32 +283,30 @@ capsites.trans$lat <- st_coordinates(capsites.trans)[,2]
 ### VERSION 1: 4 MAPS FOR COMPONENT MODELS, 1 LARGE MAP FOR NHQ
 nhq.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NHQ_Mean)) +
-  geom_sf(data = nestsites, color = "red", shape = 17, size = 8) +
-  geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 8) +
+  geom_sf(data = capsites.trans, color = "black", shape = 19, size = 8) +
+  geom_sf(data = nestsites, color = "black", fill = "white", shape = 23, size = 8) +
   paletteer::scale_fill_paletteer_c("viridis::plasma", 
                                     breaks = c(min(nhqmean.df$NHQ_Mean),max(nhqmean.df$NHQ_Mean)),
                                     labels = c("Low", "High")) +
   theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
-            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F, label_graticule = "SW") +
   theme(axis.title = element_blank(),
-        legend.position = "right",
-        legend.title = element_blank(),
-        legend.box.background = element_rect(color="black", size=2)) +
-  guides(fill = guide_colourbar(barwidth = 4, barheight = 23))
+        legend.position = "bottom",
+        legend.title = element_blank()) +
+  guides(fill = guide_colourbar(barwidth = 23, barheight = 4))
 
 #Prelaying
 pls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = PLS_Mean)) +
   paletteer::scale_fill_paletteer_c("viridis::plasma") +
-  theme_linedraw(base_size = 24) +
+  theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F) +
-  ylab("") + xlab("") +
-  theme(legend.position = "none") + 
-  theme(axis.text = element_blank(),
+  theme(legend.position = "none",
+        axis.text = element_blank(),
         axis.ticks = element_blank(), 
         axis.title = element_blank())
 
@@ -283,7 +314,7 @@ pls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
 ls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = LS_Mean)) +
   paletteer::scale_fill_paletteer_c("viridis::plasma") +
-  theme_linedraw(base_size = 24) +
+  theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F) +
@@ -296,11 +327,10 @@ ls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
 ns.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NS_Mean)) +
   paletteer::scale_fill_paletteer_c("viridis::plasma") +
-  theme_linedraw(base_size = 24) +
+  theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F) +
-  ylab("") + xlab("") +
   theme(legend.position = "none") + 
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(), 
@@ -310,11 +340,10 @@ ns.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
 ndsr.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NDSR_Mean)) +
   paletteer::scale_fill_paletteer_c("viridis::plasma") +
-  theme_linedraw(base_size = 24) +
+  theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F) +
-  ylab("") + xlab("") +
   theme(legend.position = "none") + 
   theme(axis.text = element_blank(),
         axis.ticks = element_blank(), 
@@ -329,55 +358,109 @@ final.fig <- plot_grid(top, nhq.plot,
                        ncol = 1, labels = c("", "E"),
                        label_size = 30,
                        label_x = .10, label_y = .93,
-                       hjust = -0.5, vjust = -0.5)
+                       hjust = -0.5, vjust = -0.5,
+                       rel_heights = c(1,1.2))
 
 ggsave(final.fig, file = "./Figures/Fig6 - Habitat Quality Maps V1.jpg", 
-       width = 30, height = 26)
+       width = 26, height = 30)
 
+###########################################################################
+### VERSION 2: NLCD, LiDAR, and Roads,
+myMap <- get_stamenmap(bbox = c(left = min(nhqmean.df$lon),
+                                bottom = min(nhqmean.df$lat),
+                                right = max(nhqmean.df$lon),
+                                top = max(nhqmean.df$lat)),
+                       maptype = "terrain-background",
+                       crop = T,
+                       zoom = 11,
+                       color = "color")
 
-### VERSION 2: 1 500M MAP, 1 90M MAP POPPING OUT
-#90m
-nhq.plot.90 <- ggplot(data = nhqmean.90.df, aes(x = lon, y = lat)) +
-  geom_tile(aes(fill = NHQ_Mean)) +
-  # geom_sf(data = nestsites, color = "red", shape = 17, size = 5) +
-  # geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 5) +
-  # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
-  # geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 15) +
-  paletteer::scale_fill_paletteer_c("viridis::plasma") +
-  # scale_fill_gradientn(name = "Habitat\nQuality",
-  #                      breaks = seq(0,1,.1),
-  #                      colors = terrain.colors(10), na.value = NA) +
-  theme_linedraw(base_size = 44) +
-  coord_sf(xlim = c(min(nhqmean.90.df$lon[which(!is.na(nhqmean.90.df$NHQ_Mean))]), max(nhqmean.90.df$lon[which(!is.na(nhqmean.90.df$NHQ_Mean))])),
-           ylim = c(min(nhqmean.90.df$lat[which(!is.na(nhqmean.90.df$NHQ_Mean))]), max(nhqmean.90.df$lat[which(!is.na(nhqmean.90.df$NHQ_Mean))])),
-           expand = F, label_graticule = "SW") +
-  theme(axis.title = element_blank(),
-        legend.position = "none")+
-  theme(plot.margin = unit(c(0,0,0,0), "cm"))
-
-#500M
+#Prediction Surface
 nhq.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NHQ_Mean)) +
-  # geom_sf(data = nestsites, color = "red", shape = 17, size = 5) +
-  # geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 5) +
-  # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
-  # geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 15) +
-  geom_rect(xmin = extent(st_transform(NHQ.covs.90, 4326))[1], xmax = extent(st_transform(NHQ.covs.90, 4326))[2],
-            ymin = extent(st_transform(NHQ.covs.90, 4326))[3], ymax = extent(st_transform(NHQ.covs.90, 4326))[4],
-            color = "black", fill = NA) +
-  paletteer::scale_fill_paletteer_c("viridis::plasma") +
-  # scale_fill_gradientn(name = "Habitat\nQuality",
-  #                      breaks = seq(0,1,.1),
-  #                      colors = terrain.colors(10), na.value = NA) +
+  geom_sf(data = capsites.trans, color = "black", shape = 19, size = 8) +
+  geom_sf(data = nestsites, color = "black", fill = "white", shape = 23, size = 8) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma", 
+                                    breaks = c(min(nhqmean.df$NHQ_Mean),max(nhqmean.df$NHQ_Mean)),
+                                    labels = c("Low", "High")) +
   theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F, label_graticule = "SW") +
   theme(axis.title = element_blank(),
-        legend.position = "none")+
-  theme(plot.margin = unit(c(0,0,0,0), "cm"))
+        legend.position = "bottom",
+        legend.title = element_blank()) +
+  guides(fill = guide_colourbar(barwidth = 23, barheight = 4))
 
-final.fig.2 <- (nhq.plot + plot_spacer())/(plot_spacer() + nhq.plot.90) + plot_layout(widths = c(1,2), heights = c(1,2))
+#NLCD Plot
+nlcd.plot <- ggplot(data = nlcd.df, aes(x = lon, y = lat)) +
+  geom_tile(aes(fill = as.factor(Cat))) +
+  scale_fill_manual(breaks = c("Developed", "Forested", "Agriculture", "Shrub", "Herbaceous", "Water", 'Other'),
+                    values = c("#e29e8c", "#38814e", "#fbf65d", "#af963c", "#a3cc51", "#64b3d5", "black")) +
+  theme_linedraw(base_size = 44) +
+  coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           expand = F) +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.box.background = element_rect(color="black", size=2))
 
-ggsave(final.fig.2, file = "./Figures/Fig6 - Habitat Quality Maps V2.jpg", 
-       width = 28, height = 30)
+#Percent Softwood
+sw.plot <- ggplot(data = sw.df, aes(x = lon, y = lat)) +
+  geom_tile(aes(fill = Value)) +
+  scale_fill_gradient(low = "#c4200e",
+                      high = "#228b22") +
+  theme_linedraw(base_size = 44) +
+  coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           expand = F) +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.box.background = element_rect(color="black", size=2))
+
+#Mean Tree Height Plot
+ht.plot <- ggplot(data = HT.df, aes(x = lon, y = lat)) +
+  geom_tile(aes(fill = Value)) +
+  viridis::scale_fill_viridis(option = "A") +
+  theme_linedraw(base_size = 44) +
+  coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           expand = F) +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.box.background = element_rect(color="black", size=2))
+
+#Roads
+roads.plot <- ggmap(myMap) +
+  geom_sf(data = roads.sf, lwd = .7, color = "black", inherit.aes = FALSE)+
+  theme_linedraw(base_size = 44) +
+  coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
+            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           expand = F) +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),)
+
+
+top <- plot_grid(nlcd.plot, roads.plot, ht.plot, sw.plot, 
+                 ncol = 2, labels = c("AUTO"), 
+                 align = "hv", label_size = 30,
+                 label_x = -0.01, label_y = .9,
+                 hjust = -0.5, vjust = -0.5)
+final.fig <- plot_grid(top, nhq.plot,
+                       ncol = 1, labels = c("", "E"),
+                       label_size = 30,
+                       label_x = .0, label_y = .93,
+                       hjust = -0.5, vjust = -0.5)
+
+ggsave(final.fig, file = "./Figures/Fig6 - Habitat Quality Maps V2.jpg", 
+       width = 26, height = 35)
