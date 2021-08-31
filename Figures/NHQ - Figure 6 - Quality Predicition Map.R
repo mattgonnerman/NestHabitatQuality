@@ -3,12 +3,13 @@
 #Also could have side by side NLCD and single NHQ map to show how landcover translates to NHQ
 
 #Load packages
-lapply(c('dplyr', 'ggplot2', 'sf', 'raster', 'ggmap'), require, character.only = T)
+lapply(c('dplyr', 'ggplot2', 'sf', 'raster', 'ggmap', 'cowplot'), require, character.only = T)
 
 ######################################
 ### INDIVIDUAL COMPONENT ESTIMATES ###
 ######################################
 ### Get Beta Estimates
+### 500m scale
 beta.values <- read.csv("./Final/Final Model Summary.csv") %>%
   rename(LCL = X95.CI_low, UCL = X95.CI_upp) %>%
   mutate(Range = UCL - LCL) %>% 
@@ -54,6 +55,56 @@ NHQ.covs <- st_read("./GIS/NHQ_covs.shp") %>%
                       ((SW_foc3-z.vals$Mean[47])/z.vals$SD[47])*beta.values$Mean[7] + ((D2Edg_3-z.vals$Mean[48])/z.vals$SD[48])*beta.values$Mean[8] + 
                       ((D2Rd_f1-z.vals$Mean[49])/z.vals$SD[49])*beta.values$Mean[9] + ((D2Rp_f3-z.vals$Mean[50])/z.vals$SD[50])*beta.values$Mean[10])) %>%
   mutate(Prob_NDSR = ((1/(1+NDFR+HDMR))^40))
+
+### 90m scale
+beta.values.90 <- read.csv("./Final/Final Model Summary 90m.csv") %>%
+  rename(LCL = X95.CI_low, UCL = X95.CI_upp) %>%
+  mutate(Range = UCL - LCL) %>% 
+  filter(!grepl(x = X, pattern = "NHQ"))
+z.vals <- read.csv("./ZStand_MeanSD.csv")
+
+NHQ.covs.90 <- st_read("./GIS/NHQ_covs_90m.shp") %>%
+  mutate(Prob_PLS = exp(((ag_foc3-z.vals$Mean[1])/z.vals$SD[1])*beta.values.90$Mean[41] + ((dev_fc1-z.vals$Mean[2])/z.vals$SD[2])*beta.values.90$Mean[42] +
+                          ((shrb_f1-z.vals$Mean[3])/z.vals$SD[3])*beta.values.90$Mean[43] + ((hrb_fc1-z.vals$Mean[4])/z.vals$SD[4])*beta.values.90$Mean[44] +
+                          ((BA_foc1-z.vals$Mean[5])/z.vals$SD[5])*beta.values.90$Mean[45] + ((HT_foc1-z.vals$Mean[6])/z.vals$SD[6])*beta.values.90$Mean[46] +
+                          ((SW_foc1-z.vals$Mean[7])/z.vals$SD[7])*beta.values.90$Mean[47] + ((D2Edg_2-z.vals$Mean[8])/z.vals$SD[8])*beta.values.90$Mean[48] + 
+                          ((D2Rd_f1-z.vals$Mean[9])/z.vals$SD[9])*beta.values.90$Mean[49] + ((D2Rp_f2-z.vals$Mean[10])/z.vals$SD[10])*beta.values.90$Mean[50])/(1+exp(((ag_foc3-z.vals$Mean[1])/z.vals$SD[1])*beta.values.90$Mean[41] + ((dev_fc1-z.vals$Mean[2])/z.vals$SD[2])*beta.values.90$Mean[42] +
+                                                                                                                                                                  ((shrb_f1-z.vals$Mean[3])/z.vals$SD[3])*beta.values.90$Mean[43] + ((hrb_fc1-z.vals$Mean[4])/z.vals$SD[4])*beta.values.90$Mean[44] +
+                                                                                                                                                                  ((BA_foc1-z.vals$Mean[5])/z.vals$SD[5])*beta.values.90$Mean[45] + ((HT_foc1-z.vals$Mean[6])/z.vals$SD[6])*beta.values.90$Mean[46] +
+                                                                                                                                                                  ((SW_foc1-z.vals$Mean[7])/z.vals$SD[7])*beta.values.90$Mean[47] + ((D2Edg_2-z.vals$Mean[8])/z.vals$SD[8])*beta.values.90$Mean[48] + 
+                                                                                                                                                                  ((D2Rd_f1-z.vals$Mean[9])/z.vals$SD[9])*beta.values.90$Mean[49] + ((D2Rp_f2-z.vals$Mean[10])/z.vals$SD[10])*beta.values.90$Mean[50]))) %>%
+  mutate(Prob_LS = exp(((ag_foc1-z.vals$Mean[11])/z.vals$SD[11])*beta.values.90$Mean[11] + ((dev_fc4-z.vals$Mean[12])/z.vals$SD[12])*beta.values.90$Mean[12] +
+                         ((shrb_f4-z.vals$Mean[13])/z.vals$SD[13])*beta.values.90$Mean[13] + ((hrb_fc1-z.vals$Mean[14])/z.vals$SD[14])*beta.values.90$Mean[14] +
+                         ((BA_foc1-z.vals$Mean[15])/z.vals$SD[15])*beta.values.90$Mean[15] + ((HT_foc1-z.vals$Mean[16])/z.vals$SD[16])*beta.values.90$Mean[16] +
+                         ((SW_foc3-z.vals$Mean[17])/z.vals$SD[17])*beta.values.90$Mean[17] + ((D2Edg_2-z.vals$Mean[18])/z.vals$SD[18])*beta.values.90$Mean[18] + 
+                         ((D2Rd_f4-z.vals$Mean[19])/z.vals$SD[19])*beta.values.90$Mean[19] + ((D2Rp_f3-z.vals$Mean[20])/z.vals$SD[20])*beta.values.90$Mean[20])/(1+exp(((ag_foc1-z.vals$Mean[11])/z.vals$SD[11])*beta.values.90$Mean[11] + ((dev_fc4-z.vals$Mean[12])/z.vals$SD[12])*beta.values.90$Mean[12] +
+                                                                                                                                                                   ((shrb_f4-z.vals$Mean[13])/z.vals$SD[13])*beta.values.90$Mean[13] + ((hrb_fc1-z.vals$Mean[14])/z.vals$SD[14])*beta.values.90$Mean[14] +
+                                                                                                                                                                   ((BA_foc1-z.vals$Mean[15])/z.vals$SD[15])*beta.values.90$Mean[15] + ((HT_foc1-z.vals$Mean[16])/z.vals$SD[16])*beta.values.90$Mean[16] +
+                                                                                                                                                                   ((SW_foc3-z.vals$Mean[17])/z.vals$SD[17])*beta.values.90$Mean[17] + ((D2Edg_2-z.vals$Mean[18])/z.vals$SD[18])*beta.values.90$Mean[18] + 
+                                                                                                                                                                   ((D2Rd_f4-z.vals$Mean[19])/z.vals$SD[19])*beta.values.90$Mean[19] + ((D2Rp_f3-z.vals$Mean[20])/z.vals$SD[20])*beta.values.90$Mean[20]))) %>%
+  mutate(Prob_NS = exp(((ag_foc4-z.vals$Mean[21])/z.vals$SD[21])*beta.values.90$Mean[31] + ((dev_fc2-z.vals$Mean[22])/z.vals$SD[22])*beta.values.90$Mean[32] +
+                         ((shrb_f2-z.vals$Mean[23])/z.vals$SD[23])*beta.values.90$Mean[33] + ((hrb_fc4-z.vals$Mean[24])/z.vals$SD[24])*beta.values.90$Mean[34] +
+                         ((BA_foc1-z.vals$Mean[25])/z.vals$SD[25])*beta.values.90$Mean[35] + ((HT_foc1-z.vals$Mean[26])/z.vals$SD[26])*beta.values.90$Mean[36] +
+                         ((SW_foc4-z.vals$Mean[27])/z.vals$SD[27])*beta.values.90$Mean[37] + ((D2Edg_4-z.vals$Mean[28])/z.vals$SD[28])*beta.values.90$Mean[38] + 
+                         ((D2Rd_f1-z.vals$Mean[29])/z.vals$SD[29])*beta.values.90$Mean[39] + ((D2Rp_f3-z.vals$Mean[30])/z.vals$SD[30])*beta.values.90$Mean[40])/(1+exp(((ag_foc4-z.vals$Mean[21])/z.vals$SD[21])*beta.values.90$Mean[31] + ((dev_fc2-z.vals$Mean[22])/z.vals$SD[22])*beta.values.90$Mean[32] +
+                                                                                                                                                                   ((shrb_f2-z.vals$Mean[23])/z.vals$SD[23])*beta.values.90$Mean[33] + ((hrb_fc4-z.vals$Mean[24])/z.vals$SD[24])*beta.values.90$Mean[34] +
+                                                                                                                                                                   ((BA_foc1-z.vals$Mean[25])/z.vals$SD[25])*beta.values.90$Mean[35] + ((HT_foc1-z.vals$Mean[26])/z.vals$SD[26])*beta.values.90$Mean[36] +
+                                                                                                                                                                   ((SW_foc4-z.vals$Mean[27])/z.vals$SD[27])*beta.values.90$Mean[37] + ((D2Edg_4-z.vals$Mean[28])/z.vals$SD[28])*beta.values.90$Mean[38] + 
+                                                                                                                                                                   ((D2Rd_f1-z.vals$Mean[29])/z.vals$SD[29])*beta.values.90$Mean[39] + ((D2Rp_f3-z.vals$Mean[30])/z.vals$SD[30])*beta.values.90$Mean[40]))) %>%
+  mutate(NDFR = exp(beta.values.90$Mean[52] + ((ag_foc3-z.vals$Mean[31])/z.vals$SD[31])*beta.values.90$Mean[21] + ((dev_fc4-z.vals$Mean[32])/z.vals$SD[32])*beta.values.90$Mean[22] +
+                      ((shrb_f2-z.vals$Mean[33])/z.vals$SD[33])*beta.values.90$Mean[23] + ((hrb_fc4-z.vals$Mean[34])/z.vals$SD[34])*beta.values.90$Mean[24] +
+                      ((BA_foc4-z.vals$Mean[35])/z.vals$SD[35])*beta.values.90$Mean[25] + ((HT_foc1-z.vals$Mean[36])/z.vals$SD[36])*beta.values.90$Mean[26] +
+                      ((SW_foc1-z.vals$Mean[37])/z.vals$SD[37])*beta.values.90$Mean[27] + ((D2Edg_2-z.vals$Mean[38])/z.vals$SD[38])*beta.values.90$Mean[28] + 
+                      ((D2Rd_f1-z.vals$Mean[39])/z.vals$SD[39])*beta.values.90$Mean[29] + ((D2Rp_f3-z.vals$Mean[40])/z.vals$SD[40])*beta.values.90$Mean[30])) %>%
+  mutate(HDMR = exp(beta.values.90$Mean[51] + ((ag_foc3-z.vals$Mean[41])/z.vals$SD[41])*beta.values.90$Mean[1] + ((dev_fc3-z.vals$Mean[42])/z.vals$SD[42])*beta.values.90$Mean[2] +
+                      ((shrb_f4-z.vals$Mean[43])/z.vals$SD[43])*beta.values.90$Mean[3] + ((hrb_fc4-z.vals$Mean[44])/z.vals$SD[44])*beta.values.90$Mean[4] +
+                      ((BA_foc3-z.vals$Mean[45])/z.vals$SD[45])*beta.values.90$Mean[5] + ((HT_foc2-z.vals$Mean[46])/z.vals$SD[46])*beta.values.90$Mean[6] +
+                      ((SW_foc3-z.vals$Mean[47])/z.vals$SD[47])*beta.values.90$Mean[7] + ((D2Edg_3-z.vals$Mean[48])/z.vals$SD[48])*beta.values.90$Mean[8] + 
+                      ((D2Rd_f1-z.vals$Mean[49])/z.vals$SD[49])*beta.values.90$Mean[9] + ((D2Rp_f3-z.vals$Mean[50])/z.vals$SD[50])*beta.values.90$Mean[10])) %>%
+  mutate(Prob_NDSR = ((1/(1+NDFR+HDMR))^40))
+
+
+
            
 ##################################
 ### PREPARE NHQ MAP COMPONENTS ###
@@ -63,19 +114,6 @@ nhq.values <- read.csv("./Final/Final Model Summary.csv") %>%
   rename(LCL = X95.CI_low, UCL = X95.CI_upp) %>%
   mutate(Range = UCL - LCL) %>% 
   filter(grepl(x = X, pattern = "NHQ"))
-
-# NHQ.covs <- st_read("./GIS/NHQ_covs.shp")
-# NHQ.covs <- st_transform(NHQ.covs, 4326)
-# NHQ.points <- NHQ.covs %>%
-#   dplyr::select(geometry) %>%
-#   mutate(Mean = nhq.values$Mean,
-#          Median = nhq.values$Median,
-#          LCL = nhq.values$LCL,
-#          UCL = nhq.values$UCL,
-#          Err_Range = UCL-LCL,)
-# nhqmean.df <- as.data.frame(st_coordinates(NHQ.points)) %>%
-#   rename(lon = X, lat = Y)
-# nhqmean.df$NHQ_Mean <- NHQ.points$Mean
 
 NHQ.covs <- st_transform(NHQ.covs, 32619)
 NHQ.points <- NHQ.covs %>%
@@ -129,17 +167,46 @@ NHQ.raster <- projectRaster(NHQ.raster, crs = 4326)
 NHQ.raster <- crop(NHQ.raster, extent(NHQ.raster, 10, nrow(NHQ.raster)-9, 10, ncol(NHQ.raster)-9))
 nhqmean.df$NDSR_Mean <- getValues(NHQ.raster)
 
-# ### State Boundary
-# statepoly <- st_read("E:/Maine Drive/GIS/Maine_Town_and_Townships_Boundary_Polygons_Feature.shp") %>%
-#   filter(LAND == "y",
-#          ISLAND == "n") 
-# state.merge <- st_union(statepoly)
-# 
-# ### NLCD
-# NLCD <- raster("E:/Maine Drive/GIS/NLCD_2016_Land_Cover_L48_20190424/NLCD_2016_Land_Cover_L48_20190424.img")
-# NLCD.adj <- projectRaster(NHQ.raster, crs = crs(NLCD))
-# NLCD.crop <- crop(NLCD, NLCD.adj)
-# NLCD.crop <-  projectRaster(NLCD.crop, NHQ.raster)
+### NHQ Raster 90m
+nhq.values.90 <- read.csv("./Final/Final Model Summary 90m.csv") %>%
+  rename(LCL = X95.CI_low, UCL = X95.CI_upp) %>%
+  mutate(Range = UCL - LCL) %>% 
+  filter(grepl(x = X, pattern = "NHQ"))
+
+NHQ.covs.90 <- st_transform(NHQ.covs.90, 32619)
+NHQ.points.90 <- NHQ.covs.90 %>%
+  dplyr::select(Prob_PLS, Prob_LS, Prob_NS, Prob_NDSR, geometry) %>%
+  # mutate(NonBayMean = Prob_PLS * Prob_LS * Prob_NS * Prob_NDSR) %>%
+  mutate(Mean = nhq.values.90$Mean,
+         Median = nhq.values.90$Median,
+         LCL = nhq.values.90$LCL,
+         UCL = nhq.values.90$UCL,
+         Err_Range = UCL-LCL,)
+NHQ.raster.90 <- raster(NHQ.points.90, crs = crs(NHQ.points.90), vals = 0, resolution = 90, ext = extend(extent(NHQ.points.90), 200))
+NHQ.raster.90 <- shift(NHQ.raster.90, dx = 45, dy = 45)
+NHQ.raster.90 <- rasterize(st_coordinates(NHQ.points.90)[,1:2], NHQ.raster.90, field = NHQ.points.90$Mean)
+NHQ.raster.90 <- crop(NHQ.raster.90, NHQ.covs.90)
+NHQ.raster.90 <- projectRaster(NHQ.raster.90, crs = 4326)
+NHQ.raster.90 <- crop(NHQ.raster.90, extent(NHQ.raster.90, 10, nrow(NHQ.raster.90)-9, 10, ncol(NHQ.raster.90)-9))
+nhqmean.90.df <- as.data.frame(xyFromCell(NHQ.raster.90, 1:ncell(NHQ.raster.90))) %>%
+  rename(lon = x, lat = y)
+nhqmean.90.df$NHQ_Mean <- getValues(NHQ.raster.90)
+
+### State Boundary
+statepoly <- st_read("E:/Maine Drive/GIS/Maine_Town_and_Townships_Boundary_Polygons_Feature.shp") %>%
+  filter(LAND == "y",
+         ISLAND == "n")
+state.merge <- st_union(statepoly)
+
+
+### NLCD
+NLCD <- raster("E:/Maine Drive/GIS/NLCD_2016_Land_Cover_L48_20190424/NLCD_2016_Land_Cover_L48_20190424.img")
+NLCD.adj <- projectRaster(NHQ.raster, crs = crs(NLCD))
+NLCD.crop <- crop(NLCD, NLCD.adj)
+NLCD.crop <-  projectRaster(NLCD.crop, NHQ.raster)
+nlcd.df <- as.data.frame(xyFromCell(NLCD.crop, 1:ncell(NLCD.crop))) %>%
+  rename(lon = x, lat = y)
+nlcd.df$Cat <- getValues(NLCD.crop)
 
 ### Nest Locations
 nestsites <- st_read("./GIS/NestSuccess_Covs_Z.shp") %>%
@@ -179,60 +246,29 @@ capsites.trans$lat <- st_coordinates(capsites.trans)[,2]
 #################################################
 ### Map of Study Area depicting NHQ estimates ###
 #################################################
-# Load and Format Model Estimates
 
-
-# myMap <- get_stamenmap(bbox = c(left = min(nhqmean.df$lon),
-#                                 bottom = min(nhqmean.df$lat),
-#                                 right = max(nhqmean.df$lon),
-#                                 top = max(nhqmean.df$lat)),
-#                        maptype = "terrain-background",
-#                        crop = T,
-#                        zoom = 11,
-#                        color = "color")
-
-
-# predict.map <- ggmap(myMap) +
-#   geom_tile(data = nhqmean.df, aes(fill = NHQ_Mean)) +
-#   geom_sf(data = nestsites, color = "red", shape = 17, size = 2) +
-#   geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 2) +
-#   # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
-#   geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 7) +
-#   scale_fill_gradientn(name = "Habitat\nQuality", colors = terrain.colors(10), na.value = NA) +
-#   theme_linedraw(base_size = 24) +
-#   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
-#             ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
-#            expand = F, label_graticule = "NSEW") +
-#   ylab("") + xlab("")
-
+### VERSION 1: 4 MAPS FOR COMPONENT MODELS, 1 LARGE MAP FOR NHQ
 nhq.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NHQ_Mean)) +
-  geom_sf(data = nestsites, color = "red", shape = 17, size = 5) +
-  geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 5) +
-  # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
-  geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 15) +
-  scale_fill_gradientn(name = "Habitat\nQuality",
-                       breaks = seq(0,1,.1),
-                       colors = terrain.colors(10), na.value = NA) +
+  geom_sf(data = nestsites, color = "red", shape = 17, size = 8) +
+  geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 8) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma", 
+                                    breaks = c(min(nhqmean.df$NHQ_Mean),max(nhqmean.df$NHQ_Mean)),
+                                    labels = c("Low", "High")) +
   theme_linedraw(base_size = 44) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
             ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F, label_graticule = "SW") +
-  ylab("") + xlab("")
+  theme(axis.title = element_blank(),
+        legend.position = "right",
+        legend.title = element_blank(),
+        legend.box.background = element_rect(color="black", size=2)) +
+  guides(fill = guide_colourbar(barwidth = 4, barheight = 23))
 
-
-ggsave(predict.map, file = "./Figures/Fig6 - Prediction Surface.jpg",
-       height = 16, width = 24)
-
-
-######################
-### Series of Maps ###
-######################
+#Prelaying
 pls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = PLS_Mean)) +
-  scale_fill_gradientn(name = "Habitat\nQuality",
-                       breaks = seq(0,1,.1),
-                       colors = terrain.colors(10), na.value = NA) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma") +
   theme_linedraw(base_size = 24) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
@@ -240,27 +276,26 @@ pls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   ylab("") + xlab("") +
   theme(legend.position = "none") + 
   theme(axis.text = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(), 
+        axis.title = element_blank())
 
+#Laying
 ls.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = LS_Mean)) +
-  scale_fill_gradientn(name = "Habitat\nQuality",
-                       breaks = seq(0,1,.1),
-                       colors = terrain.colors(10), na.value = NA) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma") +
   theme_linedraw(base_size = 24) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
            expand = F) +
-  ylab("") + xlab("") +
   theme(legend.position = "none") + 
   theme(axis.text = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(), 
+        axis.title = element_blank())
 
+#Nest Site
 ns.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NS_Mean)) +
-  scale_fill_gradientn(name = "Habitat\nQuality",
-                       breaks = seq(0,1,.1),
-                       colors = terrain.colors(10), na.value = NA) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma") +
   theme_linedraw(base_size = 24) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
@@ -268,13 +303,13 @@ ns.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   ylab("") + xlab("") +
   theme(legend.position = "none") + 
   theme(axis.text = element_blank(),
-        axis.ticks = element_blank())
+        axis.ticks = element_blank(), 
+        axis.title = element_blank())
 
+#Nest Success
 ndsr.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   geom_tile(aes(fill = NDSR_Mean)) +
-  scale_fill_gradientn(name = "Habitat\nQuality",
-                       breaks = seq(0,1,.1),
-                       colors = terrain.colors(10), na.value = NA) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma") +
   theme_linedraw(base_size = 24) +
   coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
            ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
@@ -282,16 +317,67 @@ ndsr.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
   ylab("") + xlab("") +
   theme(legend.position = "none") + 
   theme(axis.text = element_blank(),
-    axis.ticks = element_blank())
+        axis.ticks = element_blank(), 
+        axis.title = element_blank())
 
-require(patchwork)
-row1.plots <- (pls.plot | ls.plot)
-row2.plots <- (ns.plot | ndsr.plot)
-small.plots <- row1.plots/row2.plots
-row2.plots/nhq.plot
+top <- plot_grid(pls.plot, ls.plot, ns.plot, ndsr.plot, 
+                 ncol = 2, labels = c("AUTO"), 
+                 align = "hv", label_size = 30,
+                 label_x = -0.01, label_y = .9,
+                 hjust = -0.5, vjust = -0.5)
+final.fig <- plot_grid(top, nhq.plot,
+                       ncol = 1, labels = c("", "E"),
+                       label_size = 30,
+                       label_x = .10, label_y = .93,
+                       hjust = -0.5, vjust = -0.5)
 
-final.fig <- wrap_plots(row1.plots, row2.plots, nhq.plot, nrow = 3,
-           heights = c(1,1,2))
+ggsave(final.fig, file = "./Figures/Fig6 - Habitat Quality Maps V1.jpg", 
+       width = 30, height = 26)
 
-ggsave(final.fig, file = "./Figures/Fig6 - Habitat Quality Maps.jpg", 
+
+### VERSION 2: 1 500M MAP, 1 90M MAP POPPING OUT
+#90m
+nhq.plot.90 <- ggplot(data = nhqmean.90.df, aes(x = lon, y = lat)) +
+  geom_tile(aes(fill = NHQ_Mean)) +
+  # geom_sf(data = nestsites, color = "red", shape = 17, size = 5) +
+  # geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 5) +
+  # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
+  # geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 15) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma") +
+  # scale_fill_gradientn(name = "Habitat\nQuality",
+  #                      breaks = seq(0,1,.1),
+  #                      colors = terrain.colors(10), na.value = NA) +
+  theme_linedraw(base_size = 44) +
+  coord_sf(xlim = c(min(nhqmean.90.df$lon[which(!is.na(nhqmean.90.df$NHQ_Mean))]), max(nhqmean.90.df$lon[which(!is.na(nhqmean.90.df$NHQ_Mean))])),
+           ylim = c(min(nhqmean.90.df$lat[which(!is.na(nhqmean.90.df$NHQ_Mean))]), max(nhqmean.90.df$lat[which(!is.na(nhqmean.90.df$NHQ_Mean))])),
+           expand = F, label_graticule = "SW") +
+  theme(axis.title = element_blank(),
+        legend.position = "none")+
+  theme(plot.margin = unit(c(0,0,0,0), "cm"))
+
+#500M
+nhq.plot <- ggplot(data = nhqmean.df, aes(x = lon, y = lat)) +
+  geom_tile(aes(fill = NHQ_Mean)) +
+  # geom_sf(data = nestsites, color = "red", shape = 17, size = 5) +
+  # geom_sf(data = capsites.trans, color = "blue", shape = 19, size = 5) +
+  # geom_sf(data = cities, color = "black", shape = 19, size = 2) +
+  # geom_sf_text(data = cities, aes(label = TOWN), alpha = .6, size = 15) +
+  geom_rect(xmin = extent(st_transform(NHQ.covs.90, 4326))[1], xmax = extent(st_transform(NHQ.covs.90, 4326))[2],
+            ymin = extent(st_transform(NHQ.covs.90, 4326))[3], ymax = extent(st_transform(NHQ.covs.90, 4326))[4],
+            color = "black", fill = NA) +
+  paletteer::scale_fill_paletteer_c("viridis::plasma") +
+  # scale_fill_gradientn(name = "Habitat\nQuality",
+  #                      breaks = seq(0,1,.1),
+  #                      colors = terrain.colors(10), na.value = NA) +
+  theme_linedraw(base_size = 44) +
+  coord_sf(xlim = c(min(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lon[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           ylim = c(min(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))]), max(nhqmean.df$lat[which(!is.na(nhqmean.df$NHQ_Mean))])),
+           expand = F, label_graticule = "SW") +
+  theme(axis.title = element_blank(),
+        legend.position = "none")+
+  theme(plot.margin = unit(c(0,0,0,0), "cm"))
+
+final.fig.2 <- (nhq.plot + plot_spacer())/(plot_spacer() + nhq.plot.90) + plot_layout(widths = c(1,2), heights = c(1,2))
+
+ggsave(final.fig.2, file = "./Figures/Fig6 - Habitat Quality Maps V2.jpg", 
        width = 28, height = 30)
