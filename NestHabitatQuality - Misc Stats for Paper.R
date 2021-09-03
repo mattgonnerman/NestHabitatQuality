@@ -19,3 +19,4 @@ no.flush.vhf <- nestfate.raw %>%
   filter(is.na(Date.Counted))
 
 nrow(no.flush.vhf)
+

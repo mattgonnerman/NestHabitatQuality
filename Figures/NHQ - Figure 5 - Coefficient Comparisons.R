@@ -1,10 +1,14 @@
 lapply(c('dplyr', 'ggplot2'), require, character.only = T)
 
+comporder <- c("Prelaying Habitat Selection", "Laying Habitat Selection", "Nest Site Selection", "Nest Failure")
+covorder <- c("Developed", "Agriculture", "Shrub", "Herbaceous", "Basal Area", "Mean Tree Height", "Percent Softwood",
+              "Distance to Forest Edge", "Distance to Road", "Distance to Riparian", "Visual Obstruction")
+
 coef.results <- read.csv("./Final/Final Model Coefficient Estimates.csv") %>%
   filter(!is.na(Covariate)) %>%
   filter(ModelName != "Hen Survival") %>%
-  mutate(ModelName = factor(ModelName, levels = unique(ModelName)))%>%
-  mutate(Covariate = factor(Covariate, levels = unique(Covariate)))
+  mutate(ModelName = factor(ModelName, levels = comporder))%>%
+  mutate(Covariate = factor(Covariate, levels = covorder))
 
 
 coef.comp.plot <- ggplot(data = coef.results, aes(y = Covariate, x = Mean,
