@@ -12,7 +12,7 @@ rel.scale.results <- read.csv("./Figures/Scale Selection Outputs - Editted.csv")
                             labels = c("Agriculture", "Developed", "Shrub", "Herbaceous", "Basal Area", "Tree Height",
                                        "Softwoods", "Dist. Forest Edge", "Dist. Road", "Dist. Riparian"))) %>%
   mutate(Scale = factor(Scale, levels = c("S1", "S2", "S3", "S4"),
-                        labels = c("Winter to Nest", "Prenesting", "24 Hour", "Local")))
+                        labels = c("8334 m", "3360 m", "1328 m", "120 m")))
 
 # ggplot(rel.scale.results, aes(fill=Scale, y=value, x=Component)) + 
 #   geom_bar(position="fill", stat="identity") +

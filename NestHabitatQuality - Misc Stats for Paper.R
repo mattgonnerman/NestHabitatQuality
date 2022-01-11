@@ -20,3 +20,22 @@ no.flush.vhf <- nestfate.raw %>%
 
 nrow(no.flush.vhf)
 
+colnames(nestmonitor.raw)
+
+
+### Data Summary
+trap.slim <- trap.raw %>% dplyr::select(BirdID = AlumBand, Trans.Type, Age, Study.Area)
+nestfate.slim <- nestfate.raw %>% dplyr::select(BirdID = Alum.Band.ID, Nest.Attempt, Fate, Year)
+datasumm <- merge(nestfate.slim, trap.slim, by = "BirdID", all.x = T)
+
+datasumm %>% filter(Nest.Attempt == 1) %>% group_by(Trans.Type) %>%summarize(Total = n())
+
+datasumm %>% filter(Nest.Attempt == 1) %>% group_by(Study.Area) %>%summarize(Total = n())
+
+datasumm %>% filter(Nest.Attempt == 1) %>% group_by(Year) %>% summarize(Total = n())
+  
+datasumm %>% filter(Nest.Attempt == 1, Trans.Type != "") %>% group_by(Fate) %>%summarize(Total = n())
+
+33+56+12
+
+length(unique(datasumm$BirdID))

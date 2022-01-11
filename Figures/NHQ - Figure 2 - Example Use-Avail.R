@@ -1,6 +1,8 @@
 #Load packages
 lapply(c('dplyr', 'ggplot2', 'patchwork', 'tidyr', 'sf', 'ggmap', 'cowplot'), require, character.only = T)
 
+setwd("E:/GitHub/NestHabitatQuality/")
+
 laying.gps.avail <- st_read("./GIS/laying.gps.avail.polygon.shp") %>%
   filter(NestID == "1616-2020-1") %>%
   st_transform(4326) %>%
@@ -80,8 +82,8 @@ gps.map <- ggmap(gpsMap) +
   geom_sf(data = gps.cap, aes(color = colors[7]), inherit.aes = FALSE, size = 3) +
   theme_linedraw(base_size = 20) +
   scale_color_manual(name = "Scale", values = colors,
-                     labels = c("Prelaying - Available", "Prelaying - Used", "Laying - Available", "Laying - Used",
-                                "Nest Site - Available", "Nest Site - Used", "Capture Site")) +
+                     labels = c("Prelaying - Available", "Prelaying - Use", "Laying - Available", "Laying - Use",
+                                "Nest Site - Available", "Nest Site - Use", "Capture Site")) +
   guides(color = guide_legend(override.aes = list(fill = colors)))
 gpslegend <- get_legend(gps.map + theme(legend.position = "bottom",
                                         legend.title = element_blank(),

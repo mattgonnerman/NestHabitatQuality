@@ -1,6 +1,7 @@
 #Load packages
 lapply(c('dplyr', 'ggplot2', 'patchwork', 'tidyr', 'sf', 'ggmap'), require, character.only = T)
 
+setwd("E:/GitHub/NestHabitatQuality/")
 ### IDEAS
 # Popout map witht the study areas showing capture sites where transmitters were deployed.
 # Large map is state map with study areas outlined, general terrain basemap
@@ -47,14 +48,23 @@ northSA_bb = st_as_sfc(st_bbox(northSA))
 # State Map
 state_coords <- as.numeric(st_bbox(mainepoly))
 
-stateMap <- get_stamenmap(bbox = c(left = state_coords[1],
-                                   bottom = state_coords[2],
-                                   right = state_coords[3],
-                                   top = state_coords[4]),
-                          maptype = "terrain-background",
-                          crop = T,
-                          zoom = 1,
-                          color = "color")
+# Nest Locations
+nestsites <- read.csv("Nest Monitoring - Nest Info.csv") %>%
+  filter(Nest.Attempt == 1) %>%
+  filter(!is.na(NestLat)) %>%
+  filter(!is.na(Alum.Band.ID)) %>%
+  dplyr::select(NestID, NestLat, NestLong) %>%
+  mutate(lat = NestLat, lon = NestLong) %>%
+  st_as_sf(coords = c("NestLong", "NestLat"), crs = 4326)
+
+# stateMap <- get_stamenmap(bbox = c(left = state_coords[1],
+#                                    bottom = state_coords[2],
+#                                    right = state_coords[3],
+#                                    top = state_coords[4]),
+#                           maptype = "terrain-background",
+#                           crop = T,
+#                           zoom = 1,
+#                           color = "color")
 
 
 state.plot <- ggplot(data = mainepoly) +
@@ -79,10 +89,11 @@ northMap <- get_stamenmap(bbox = c(left = northSA_coords[1],
 
 north.plot <- ggmap(northMap) +
   geom_sf(data = capsites.trans, color = "black", size = 5) +
+  geom_sf(data = nestsites, fill = "red", size = 5, shape = 24 ) +
   theme_linedraw(base_size = 30) +
   coord_sf(xlim = northSA_coords[c(1,3)],
             ylim = northSA_coords[c(2,4)],
-           expand = F, label_graticule = "NE") + 
+           expand = F, label_graticule = "SE") + 
   theme(axis.title=element_blank()) +
   ggsn::scalebar(x.min = northSA_coords[1] ,
                  y.min = northSA_coords[2] + .05,
@@ -109,6 +120,7 @@ southMap <- get_stamenmap(bbox = c(left = southSA_coords[1],
 
 south.plot <- ggmap(southMap) +
   geom_sf(data = capsites.trans, color = "black", size = 5) +
+  geom_sf(data = nestsites, fill = "red", size = 5, shape = 24 ) +
   theme_linedraw(base_size = 30) +
   coord_sf(xlim = southSA_coords[c(1,3)],
            ylim = southSA_coords[c(2,4)],
@@ -128,12 +140,24 @@ south.plot <- ggmap(southMap) +
 
 # Combine into single figure
 require(patchwork)
+layout <- "
+AABBBBBB
+CCBBBBBB
+CCBBBBBB
+"
+combo.plots <- state.plot + north.plot + south.plot + 
+  plot_layout(design = layout) + 
+  plot_annotation(tag_levels = "A") & 
+  theme(plot.tag = element_text(size = 30))
 
-leftplots <- wrap_plots(state.plot, south.plot, nrow = 2,
-           heights = c(1,2))
+# leftplots <- wrap_plots(state.plot, south.plot, nrow = 2,
+#            heights = c(1,2)) 
+# 
+# combo.plots <- wrap_plots(leftplots, north.plot, nrow = 1,
+#                         widths = c(1,3), tag_level = 'keep') + 
+#   plot_annotation(tag_levels = "A") & 
+#   theme(plot.tag = element_text(size = 30))
 
-combo.plots <- wrap_plots(leftplots, north.plot, nrow = 1,
-                        widths = c(1,3))
 ggsave(combo.plots, file = "./Figures/Fig1 - Study Areas Map.jpg",
-       width = 20, height = 15)
+       width = 21, height = 15, dpi = 600)
 

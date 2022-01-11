@@ -1,6 +1,8 @@
 #Load packages
 lapply(c('dplyr', 'ggplot2', 'nimble', 'patchwork'), require, character.only = T)
 
+setwd("E:/GitHub/NestHabitatQuality/")
+
 #Example of High, medium and low support?
 #Using Nest Site selection,
 #High = D2Edge
@@ -67,10 +69,10 @@ LS.plot <- ggplot(data = LS.df, aes(x = Order, y = beta_SC_NSel, group = Scale))
 
 ### Combine
 combo.plot <- HS.plot + MS.plot + LS.plot + plot_annotation(tag_levels = 'A') &
-  theme(plot.tag.position = c(.15, 1), plot.tag = element_text(size = 12))
+  theme(plot.tag.position = c(.05, 1), plot.tag = element_text(size = 24))
 # combo.plot
 
 ggsave(combo.plot, file ="./Figures/Fig3 - Example Scale Selection.jpg",
-       width = 13, height = 8)
+       width = 13, height = 8, dpi = 1200)
 
 

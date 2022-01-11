@@ -52,7 +52,7 @@ beta_SC_PLSel[4],Prelaying Habitat Selection,Herbaceous,1,0.657,0.657,0.024,0.61
 beta_SC_PLSel[7],Prelaying Habitat Selection,Percent Softwood,1,1.02,1.021,0.094,0.844,1.206,1,7
 beta_SC_PLSel[9],Prelaying Habitat Selection,Distance to Road,1,1.243,1.243,0.036,1.175,1.311,1,9
 ,Nest Site Selection,Visual Obstruction,4,-0.1652701,-0.1639192,0.02776562,-0.2233034,-0.1136315,6,1
-,Nest Failure,Visual Obstruction,4,-3.52290983,-3.5182604,0.19758961,-3.9194582,-3.15419054,6,2
+,Nest Failure,NA,4,-3.52290983,-3.5182604,0.19758961,-3.9194582,-3.15419054,6,2
 ,Nest Failure,Visual Obstruction,4,-0.01434724,-0.0144349,0.02618724,-0.06684373,0.03700445,6,2
 ,Hen Survival,Visual Obstruction,4,-0.19133662,-0.1622978,0.16548963,-0.58587063,0.05518818,6,3
-,Hen Survival,Visual Obstruction,4,-5.65379827,-5.6102183,0.64708769,-7.07491155,-4.53271544,6,3
+,Hen Survival,NA,4,-5.65379827,-5.6102183,0.64708769,-7.07491155,-4.53271544,6,3
